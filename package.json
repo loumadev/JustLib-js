@@ -1,0 +1,12 @@
+{
+	"name": "justlib-js",
+	"version": "0.0.1",
+	"description": "JustLib.js Library",
+	"main": "JustLib.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/loumadev/JustLib-js.git"
+	},
+	"author": "Jaroslav Louma",
+	"homepage": "https://github.com/loumadev/JustLib-js#readme"
+}
