@@ -4,13 +4,21 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-05-22T23:18:34+02:00
+ * Last Modified: 2021-05-31T01:14:33+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
 
 
 "use strict";
+
+/**
+ * @typedef {Function} JL
+ * @param {HTMLElement|string} root Root Element of HTML Selector
+ * @param {string} [selector] HTML Selector
+ * @param {number} [index=-1] Index of element
+ * @returns {HTMLElement|HTMLElement[]}
+ */
 
 
 /* ========= Maths ========= */
@@ -20,6 +28,7 @@ var _angle_precision = 8;
 /**
  * Converts Degrees to Radians.
  * @param {number} deg Degrees
+ * @returns {number}
  */
 function deg2rad(deg) {
 	return (deg * Math.PI) / 180;
@@ -28,6 +37,7 @@ function deg2rad(deg) {
 /**
  * Converts Radians to Degrees.
  * @param {number} rad Degrees
+ * @returns {number}
  */
 function rad2deg(rad) {
 	return (rad * 180) / Math.PI;
@@ -36,6 +46,7 @@ function rad2deg(rad) {
 /**
  * Converts Decimal number to Binnary number.
  * @param {number} dec Decimal number
+ * @returns {string}
  */
 function dec2bin(dec) {
 	return parseInt(dec, 10).toString(2);
@@ -44,6 +55,7 @@ function dec2bin(dec) {
 /**
  * Converts Binnary number to Decimal number.
  * @param {number} bin Binnary number
+ * @returns {number}
  */
 function bin2dec(bin) {
 	return parseInt(bin, 2);
@@ -53,6 +65,7 @@ function bin2dec(bin) {
  * Returns Exponent of Power (3^x=9 => 2).
  * @param {number} power Final power
  * @param {number} base Power base
+ * @returns {number}
  */
 function getExponent(power, base) {
 	return Math.log(power) / Math.log(base);
@@ -61,6 +74,7 @@ function getExponent(power, base) {
 /**
  * Returns sine of the angle.
  * @param {number} angle Angle to be processed
+ * @returns {number}
  */
 function fastSin(angle) {
 	angle %= TWO_PI;
@@ -71,6 +85,7 @@ function fastSin(angle) {
 /**
  * Returns cosine of the angle.
  * @param {number} angle Angle to be processed
+ * @returns {number}
  */
 function fastCos(angle) {
 	angle %= TWO_PI;
@@ -84,6 +99,7 @@ function fastCos(angle) {
  * Checks whether HTML Element has Class.
  * @param {HTMLElement} elm HTML Element
  * @param {string} cls Class
+ * @returns {boolean}
  */
 function hasClass(elm, cls) {
 	if(!elm || typeof elm.className !== "string") return false;
@@ -95,6 +111,7 @@ function hasClass(elm, cls) {
  * @param {HTMLElement} elm HTML Element
  * @param {string} cls Class
  * @param {boolean} state set/reset
+ * @returns {boolean}
  */
 function toggleClass(elm, cls, state = undefined) {
 	if(typeof elm === "undefined" || !(elm instanceof HTMLElement)) return false; //throw new TypeError(elm + " is not valid HTML element");
@@ -117,6 +134,7 @@ function toggleClass(elm, cls, state = undefined) {
 /**
  * Returns Array of parent nodes of HTML Element.
  * @param {HTMLElement} elm HTML Element
+ * @returns {HTMLElement[]}
  */
 function getPath(elm) {
 	var path = [];
@@ -206,6 +224,7 @@ function cloneElement(node, style = true) {
  * @param {HTMLElement} elm Target element
  * @param {number} minimal 
  * @param {number} axis 0 - Both axis, 1 - X axis, 2 - Y axis (default = 2)
+ * @returns {boolean}
  */
 function isElementInView(elm, minimal = 1, axis = 2) {
 	var pos = getElementPosition(elm);
@@ -277,7 +296,7 @@ function isTouchscreen() {
  */
 function getQueryParameters(string = window.location.search) {
 	var obj = {};
-	var params = string.split(/[\?&]+/);
+	var params = string.split(/[?&]+/);
 
 	for(var param of params) {
 		if(!param) continue;
@@ -296,6 +315,7 @@ function getQueryParameters(string = window.location.search) {
  * @param {number} fromMax Ending range of the input number.
  * @param {number} toMin Starting range of output number (Default: 0).
  * @param {number} toMax Ending range of output number (Default: 1).
+ * @returns {number}
  */
 function map(number, fromMin, fromMax, toMin = 0, toMax = 1) {
 	return (
@@ -310,6 +330,7 @@ function map(number, fromMin, fromMax, toMin = 0, toMax = 1) {
  * @param {number} number Number to be mapped.
  * @param {number} min Minimal number (Default: 0).
  * @param {number} max Maximal number (Default: 1).
+ * @returns {number}
  */
 function clamp(number, min = 0, max = 1) {
 	return number < min ? min : number > max ? max : number;
@@ -325,6 +346,7 @@ var fit = clamp;
  * @deprecated Use native `Array.prototype.includes(...)`
  * @param {Array} arr Number to be mapped.
  * @param {any} elm Starting range of the input number.
+ * @returns {boolean}
  */
 function arrContains(arr, elm) {
 	for(var i = 0; i < arr.length; i++) {
@@ -343,6 +365,7 @@ function shuffleArray(o) {
  * Returns index of element in 2D Array.
  * @param {Array} arr Number to be mapped.
  * @param {any} elm Starting range of the input number.
+ * @returns {[number, number] | -1}
  */
 function indexOf(arr, elm) {
 	for(var i = 0; i < arr.length; i++) {
@@ -364,6 +387,7 @@ function parseHTML(html) {
 	return elms.length == 1 ? elms[0] : elms;
 }
 
+// eslint-disable-next-line valid-jsdoc
 /**
  * 
  * @deprecated Use native `String.prototype.matchAll(...)` instead
@@ -381,7 +405,7 @@ function loopRegex(text, regex, callback) {
 
 	if(flags.indexOf("g") < 0) regex = new RegExp(regex, flags + "g");
 	while((match = regex.exec(text)) != null) {
-		if(i > 10000) throw "Infinte loop";
+		if(i > 10000) throw new Error("Infinte loop");
 		callback(match);
 		i++;
 	}
@@ -426,7 +450,7 @@ function objectDeepMerge(target, source, isMergingArrays = false) {
 	});
 
 	return target;
-};
+}
 
 function insertAt(text, index, addText) {
 	return [text.slice(0, index), addText, text.slice(index)].join("");
@@ -501,7 +525,9 @@ var getUniqueID = generateUniqueID;
 /**
  * Returns random number between given numbers or between 0 and given number.
  * @param {number} min Minimal number.
- * @param {number} max Maximal number.
+ * @param {number} [max=undefined] Maximal number.
+ * @param {boolean} [round=true]
+ * @returns {number}
  */
 function random(min, max = undefined, round = true) {
 	var ran = 0;
@@ -529,6 +555,7 @@ function randomGaussian(min, max, skew = 1) {
  * Returns destance between two Vectors.
  * @param {Vector} v1 Minimal number.
  * @param {Vector} v2 Maximal number.
+ * @returns {number}
  */
 function distance(v1, v2) {
 	return v1.z && v2.z ?
@@ -540,6 +567,7 @@ function distance(v1, v2) {
  * Returns destance between two Vectors.
  * @param {Vector} v1 Minimal number.
  * @param {Vector} v2 Maximal number.
+ * @returns {number}
  */
 function angle(v1, v2) {
 	return Math.atan2(v2.y - v1.y, v2.x - v1.x);
@@ -548,27 +576,23 @@ function angle(v1, v2) {
 /**
  * Converts HEXa color to RGBa.
  * @deprecated Use `new Color(...).toString("rgba")` instead
- * @param {string} c HEXa color prefixed with "#".
+ * @param {string} b HEXa color prefixed with "#".
+ * @returns {string}
  */
 function hexa2rgba(b) {
 	var c = b.match(/#(.{2})(.{2})(.{2})(.{2})/);
-	if(!c) throw "Correct format: #rrggbbaa";
+	if(!c) throw new Error("Correct format: #rrggbbaa");
 	var d = "";
 	for(var i = 1; i < 4; i++)
 		d += (i == 1 ? "" : ",") + parseInt("0x" + c[i]);
-	return (
-		"rgba(" +
-		d +
-		"," +
-		(~~((parseInt("0x" + c[4]) / 255) * 100) / 100 + "").slice(1) +
-		")"
-	);
+	return "rgba(" + d + "," + (~~((parseInt("0x" + c[4]) / 255) * 100) / 100 + "").slice(1) + ")";
 }
 
 /**
  * Parses color string to Color object
  * @deprecated Use `new Color(...)` instead
- * @param {string} c HEXa color prefixed with "#".
+ * @param {string} color HEXa color prefixed with "#".
+ * @returns {Color}
  */
 function parseColor(color) {
 	if(color.startsWith("#")) {
@@ -585,6 +609,7 @@ function parseColor(color) {
 /**
  * Returns shortened size with units.
  * @param {number} s Size in bytes.
+ * @returns {string}
  */
 function getFormattedSize(s) {
 	if(s < 1024) return s + "B";
@@ -596,6 +621,7 @@ function getFormattedSize(s) {
 /**
  * Returns shortened time with units.
  * @param {number} t Time in milliseconds.
+ * @returns {string}
  */
 function getFormattedTime(t) {
 	if(t < 1000) return t + "ms";
@@ -755,12 +781,13 @@ const HIGHLIGHTER = {
  * @prop {boolean} [allowSelection=true] Allow line selection
  */
 
+// eslint-disable-next-line valid-jsdoc
 /**
  * Highlight input code as HTML
  * @param {string} str Input code
  * @param {HighlightOptions} options Highlighter options 
  * @param {(error: Error, originalString: string) => void} onerror Error event callback
- * @returns {string} Highlighted input code
+ * @return {string} Highlighted input code
  */
 function Highlight(str, {
 	tabSize = 4,
@@ -883,7 +910,7 @@ function Highlight(str, {
 			var pos0 = start + offset;
 
 			var text0 = `<span style="color: var(--${color})">`;
-			var text1 = `</span>`;
+			var text1 = "</span>";
 
 			var pos1 = text0.length + end + offset;
 
@@ -919,7 +946,7 @@ function Highlight(str, {
 	//console.log(str);
 
 	const TAB = range(tabSize).reduce(prev => prev + "&nbsp;", "");
-	const INDENT = `<span class="highlight-indent"></span>`;
+	const INDENT = "<span class=\"highlight-indent\"></span>";
 
 	str = str.replace(/\t/g, TAB/*"&nbsp;&nbsp;&nbsp;&nbsp;"*/);
 	str = str.replace(/  /g, "&nbsp;&nbsp;");
@@ -946,8 +973,8 @@ function Highlight(str, {
 	var lines = str.split("\n");
 
 	for(var i = 0; i < lines.length; i++) {
-		if(lineNumbers) lines[i] = `<tr class="highlight-tr"><td class="highlight-line"><div class="highlight-div">${i + 1}</div></td><td class="highlight-code"><pre class="highlight-pre" ${failed ? 'style="color:white;"' : ""}>${lines[i].replace(/\r/g, "")}</pre></td></tr>`;
-		else lines[i] = `<tr class="highlight-tr"><td class="highlight-code"><pre class="highlight-pre" ${failed ? 'style="color:white;"' : ""}>${lines[i].replace(/\r/g, "")}</pre></td></tr>`;
+		if(lineNumbers) lines[i] = `<tr class="highlight-tr"><td class="highlight-line"><div class="highlight-div">${i + 1}</div></td><td class="highlight-code"><pre class="highlight-pre" ${failed ? 'style="color: white;"' : ""}>${lines[i].replace(/\r/g, "")}</pre></td></tr>`;
+		else lines[i] = `<tr class="highlight-tr"><td class="highlight-code"><pre class="highlight-pre" ${failed ? 'style="color: white;"' : ""}>${lines[i].replace(/\r/g, "")}</pre></td></tr>`;
 
 		if(indentLines) {
 			if(debug) console.log(lines[i]);
@@ -959,7 +986,7 @@ function Highlight(str, {
 				var indent = range(0, len - len % tabSize, tabSize).reduce(prev => prev + INDENT + TAB, "");
 				var remain = range(len % tabSize).reduce(prev => prev + "&nbsp;", "");
 
-				return before + indent + remain
+				return before + indent + remain;
 			});
 			if(debug) console.log(lines[i]);
 			//((&nbsp;){4})(?=<pre>|&nbsp;)
@@ -1092,6 +1119,8 @@ class Matrix {
 	/**
 	 * Multiplies Matrix with another Matrix or Number.
 	 * @param {Matrix} matrix Matrix or Number.
+	 * @param {boolean} [hadamard=false]
+	 * @returns {Matrix}
 	 */
 	mult(matrix, hadamard = false) {
 		var isMat = matrix instanceof Matrix;
@@ -1100,9 +1129,7 @@ class Matrix {
 
 		if(hadamard) {
 			if(this.rows != matrix.rows || this.cols != matrix.cols) {
-				console.warn(
-					"[JustLib] Columns and rows of matrices are not equal! (Hadamard Product)"
-				);
+				console.warn("[JustLib] Columns and rows of matrices are not equal! (Hadamard Product)");
 				return undefined;
 			}
 			for(var i = 0; i < this.rows; i++) {
@@ -1114,9 +1141,7 @@ class Matrix {
 		}
 
 		if(isMat && this.cols != matrix.rows) {
-			console.warn(
-				"[JustLib] Columns and rows of matrices are not equal!"
-			);
+			console.warn("[JustLib] Columns and rows of matrices are not equal!");
 			return undefined;
 		}
 
@@ -1130,9 +1155,7 @@ class Matrix {
 				} else if(typeof matrix === "number") {
 					sum = this.matrix[i][j] * matrix;
 				} else {
-					console.warn(
-						`[JustLib] Invalid type of parameter "${typeof matrix}", only supported are Numbers and Matrices!`
-					);
+					console.warn(`[JustLib] Invalid type of parameter "${typeof matrix}", only supported are Numbers and Matrices!`);
 					return undefined;
 				}
 				mat.matrix[i][j] = sum;
@@ -1144,26 +1167,25 @@ class Matrix {
 	/**
 	 * Adds Matrix to another Matrix.
 	 * @param {Matrix} matrix Matrix.
+	 * @returns {Matrix}
 	 */
 	add(matrix) {
 		var mat = new Matrix(this.rows, this.cols);
-		if(!(matrix instanceof Matrix) ||
-			this.rows != matrix.rows ||
-			this.cols != matrix.cols
-		)
-			return undefined;
+		if(!(matrix instanceof Matrix) || this.rows != matrix.rows || this.cols != matrix.cols) return undefined;
 
 		for(var i = 0; i < this.rows; i++) {
 			for(var j = 0; j < this.cols; j++) {
 				mat.matrix[i][j] = this.matrix[i][j] + matrix.matrix[i][j];
 			}
 		}
+
 		return mat;
 	}
 
 	/**
 	 * Substracts Matrix from another Matrix.
 	 * @param {Matrix} matrix Matrix.
+	 * @returns {Matrix}
 	 */
 	sub(matrix) {
 		var mat = new Matrix(this.rows, this.cols);
@@ -1181,6 +1203,7 @@ class Matrix {
 		return mat;
 	}
 
+	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Calls callback function on each element of Matrix, and returns result matrix.
 	 * @param {(value: number, x: number, y: number, thisArg: Matrix)} callback Callback function.
@@ -1198,7 +1221,7 @@ class Matrix {
 
 	/**
 	 * Transposes the Matrix. New Matrix is returned.
-	 * @return {Matrix} New transposed Matrix.
+	 * @returns {Matrix} New transposed Matrix.
 	 */
 	transpose() {
 		var mat = new Matrix(this.cols, this.rows);
@@ -1233,7 +1256,7 @@ class Matrix {
 
 	/**
 	 * Trasnforms Matrix into 1D array.
-	 * @param {number[]} new Array.
+	 * @returns {number[]} new Array.
 	 */
 	toArray() {
 		var array = [];
@@ -1350,6 +1373,7 @@ class Color {
 		}
 	}
 
+	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Calls a defined callback function on each color channel, and returns new Color object that contains the results.
 	 * @param {(value: number, channel: string, thisArg: Color) => number} callback A function that accepts up to three arguments. The map method calls the callbackfn function one time for each color channel.
@@ -1422,7 +1446,7 @@ class Color {
 	/**
 	 * Parses color string
 	 * Supported formats: RGB, RGBA, HEX, HEXA, HLS, HLSA
-	 * @param {string} color color string
+	 * @param {string} string color string
 	 * @returns {Color} parsed color
 	 */
 	static parse(string) {
@@ -1531,7 +1555,7 @@ class Color {
 class ComplexNumber {
 	/**
 	 * Creates new Complex Number object.
-	 * @param {String|Number[2]} number String to parse complex number.
+	 * @param {string | Array<number, number>} number String to parse complex number.
 	 * @param {string} sign Imaginary unit indicator
 	 */
 	constructor(number, sign = "i") {
@@ -1640,7 +1664,7 @@ class EventListener {
 			type: type,
 			time: new Date(),
 			defaultPreventable: !!callback,
-		}
+		};
 		let eventObject;
 
 		//Add data to an object
@@ -1759,7 +1783,7 @@ class EventListenerStatic {
 			type: type,
 			time: new Date(),
 			defaultPreventable: !!callback,
-		}
+		};
 		let eventObject;
 
 		//Add data to an object
@@ -1923,7 +1947,7 @@ function createSlider(
 		label.innerText = node.value;
 		if(typeof output === "string") eval(output + "=" + node.value);
 		else if(typeof output === "function") output(+node.value);
-		else throw "[JustLib] Slider: Unknown output";
+		else throw new Error("[JustLib] Slider: Unknown output");
 	};
 	node.addEventListener("change", call);
 	node.addEventListener("input", call);
@@ -1993,6 +2017,7 @@ String.prototype.capitalize = function() {
 
 try {
 	Object.defineProperty(Object.prototype, "reduce", {
+		// eslint-disable-next-line valid-jsdoc
 		/**
 		 * Equivalent of Array.prototype.reduce
 		 *
@@ -2107,19 +2132,6 @@ try {
 	} catch(e) { }
 })();
 
-
-
-/**
- * A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each key-value pair in the object.
- *
- * Calls the specified callback function for all the key-value pairs in a object. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- * @callback Object~callbackfn
- * @param {any} previousValue The previousValue accumulates callback's return values. It is the accumulated value previously returned in the last invocation of the callback or initialValue, if it was supplied.
- * @param {Object} currentValue The current key-value pair (object) being processed in the object.
- * @param {number} currentIndex The index of the current element being processed in the array. Starts from index 0 if an initialValue is provided. Otherwise, it starts from index 1.
- * @param {Object} object The object reduce() was called upon.
- * @returns {any} New accumulator value
- */
 
 /* ======= Constants ======= */
 const PI = Math.PI;
