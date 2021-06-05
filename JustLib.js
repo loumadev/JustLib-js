@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-05-31T01:14:33+02:00
+ * Last Modified: 2021-06-05T20:37:24+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1633,16 +1633,11 @@ class EventListener {
 		this.on = this.addEventListener;
 	}
 
-	/**
-	 * This callback is displayed as part of the Requester class.
-	 * @callback EventHandler
-	 * @param {EventListener.EventData} event
-	 */
-
+	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Add event handler for specific event
 	 * @param {string} type Event type
-	 * @param {EventHandler} callback Event callback
+	 * @param {(event: EventListener.Event) => void} callback Event callback
 	 * @returns {EventListener.Listener} Event listener object
 	 */
 	addEventListener(type, callback) {
@@ -1651,12 +1646,13 @@ class EventListener {
 		return listener;
 	}
 
+	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Fires specific event
 	 * @param {string} type Event type
-	 * @param {Object|EventListener.Event} [data={}] Custom event data
-	 * @param {Function} [callback=null] Default action handler
-	 * @returns {any|undefined} Returned value of the callback function
+	 * @param {Object<string, any> | EventListener.Event} [data={}] Custom event data
+	 * @param {(event: EventListener.Event) => any} [callback=null] Default action handler
+	 * @returns {any | undefined} Returned value of the callback function
 	 */
 	dispatchEvent(type, data = {}, callback = null) {
 		//Setup Event Object
@@ -1668,7 +1664,6 @@ class EventListener {
 		let eventObject;
 
 		//Add data to an object
-		//console.log("instance", data instanceof EventListener.Event);
 		if(data instanceof EventListener.Event) {
 			//Assign Event Object
 			eventObject = data;
@@ -1678,7 +1673,6 @@ class EventListener {
 			for(const prop in defaultData) {
 				if(prop in eventObject) continue;
 				eventObject[prop] = defaultData[prop];
-				//console.log(type, "reseted");
 			}
 		} else {
 			//Create new Event Object
