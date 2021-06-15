@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-06-05T20:37:24+02:00
+ * Last Modified: 2021-06-14T18:47:43+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1575,11 +1575,35 @@ class ComplexNumber {
 		} else throw new TypeError(number + " is not a valid complex number");
 
 		/* Init */
+
+		/**
+		 * Real part of the number
+		 * @type {number}
+		 */
 		this.r = r;
+
+		/**
+		 * Imaginary part of the number
+		 * @type {number}
+		 */
 		this.i = i;
+
+		/**
+		 * Imaginary part identifier (usually `i` or `j`)
+		 * @type {number}
+		 */
 		this.sign = sign;
 
+		/**
+		 * Distance of number from origin
+		 * @type {number}
+		 */
 		this.distance = Math.hypot(this.r, this.i);
+
+		/**
+		 * Angle between origin and number
+		 * @type {number}
+		 */
 		this.angle = Math.atan(this.i / this.r);
 	}
 	add(x) {
