@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-06-14T18:47:43+02:00
+ * Last Modified: 2021-07-13T14:35:29+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -694,6 +694,8 @@ function iterate(iterable) {
 function zip(...iterables) {
 	var iterator = [];
 	var len = Math.min(...iterables.map(e => e.length));
+
+	if(iterables.length == 0) return iterator;
 
 	for(var i = 0; i < len; i++) {
 		iterator[i] = [];
