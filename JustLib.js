@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-07-14T17:02:13+02:00
+ * Last Modified: 2021-07-14T19:13:42+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -46,7 +46,7 @@ function rad2deg(rad) {
 
 /**
  * Converts Decimal number to Binnary number.
- * @param {number} dec Decimal number
+ * @param {string} dec Decimal number
  * @returns {string}
  */
 function dec2bin(dec) {
@@ -55,7 +55,7 @@ function dec2bin(dec) {
 
 /**
  * Converts Binnary number to Decimal number.
- * @param {number} bin Binnary number
+ * @param {string} bin Binnary number
  * @returns {number}
  */
 function bin2dec(bin) {
@@ -139,33 +139,33 @@ function toggleClass(elm, cls, state = undefined) {
  */
 function getPath(elm) {
 	var path = [];
-	for(; elm; elm = elm.parentNode) {
+	while(elm = /** @type {HTMLElement} */(elm.parentNode)) {
 		if(elm.tagName.toLowerCase() === "html") break;
 		path.push(elm);
 	}
 	return path.reverse();
 }
 
+// eslint-disable-next-line valid-jsdoc
 /**
- * Returns Array of parent nodes of HTML Element.
- * @param {HTMLElement|string} root Root Element of HTML Selector
- * @param {string} [selector] HTML Selector
- * @param {number} [index=-1] Index of element
- * @returns {HTMLElement|HTMLElement[]}
+ * @type {((selector: string, index?: number) => Element | Element[]) & ((root: HTMLElement, selector: string, index?: number) => Element | Element[])}
  */
-function JL(root, selector, index = -1) {
+let JL = function(root, selector, index = -1) {
 	var elm;
 	if(typeof root === "string") {
 		elm = document.querySelectorAll(root);
 		index = selector;
 	} else {
+		if(!(root instanceof HTMLElement)) throw new TypeError(`'root' is not valid HTMLElement`);
+		if(typeof selector !== "string") throw new TypeError(`'selector' is not a HTML selector`);
+
 		elm = root.querySelectorAll(selector);
 	}
 	if(!elm.length) return undefined;
 	else if(elm.length == 1) return elm[0];
 	else if(index > -1) return elm[index];
 	else return [...elm];
-}
+};
 
 /**
  * @deprecated Use `JL(...)` instead
@@ -274,17 +274,17 @@ function isFullscreen() {
 function exitFullscreen() {
 	if(document.exitFullscreen) {
 		document.exitFullscreen();
-	} else if(document.mozCancelFullScreen) {
+	} else if("mozCancelFullScreen" in document) {
 		document.mozCancelFullScreen();
-	} else if(document.webkitExitFullscreen) {
+	} else if("webkitExitFullscreen" in document) {
 		document.webkitExitFullscreen();
-	} else if(document.msExitFullscreen) {
+	} else if("msExitFullscreen" in document) {
 		document.msExitFullscreen();
 	} else return false;
 }
 
 function isTouchscreen() {
-	if(("ontouchstart" in window) || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0 || (window.DocumentTouch && document instanceof DocumentTouch)) return true;
+	if(("ontouchstart" in window) || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0 || ("DocumentTouch" in window && document instanceof DocumentTouch)) return true;
 	else return false;
 }
 
@@ -379,7 +379,7 @@ function indexOf(arr, elm) {
 /**
  * 
  * @param {string} html 
- * @returns {HTMLElement | NodeList}
+ * @returns {ChildNode | NodeListOf<ChildNode>}
  */
 function parseHTML(html) {
 	var template = document.createElement("template");
@@ -392,7 +392,7 @@ function parseHTML(html) {
 /**
  * 
  * @deprecated Use native `String.prototype.matchAll(...)` instead
- * @param {string} text 
+ * @param {string | RegExp} text 
  * @param {RegExp} regex 
  * @param {(match: RegExpExecArray) => void} callback 
  * @returns {number} Last index
@@ -405,7 +405,7 @@ function loopRegex(text, regex, callback) {
 		match;
 
 	if(flags.indexOf("g") < 0) regex = new RegExp(regex, flags + "g");
-	while((match = regex.exec(text)) != null) {
+	while((match = regex.exec(/** @type {string} */(text))) != null) {
 		if(i > 10000) throw new Error("Infinte loop");
 		callback(match);
 		i++;
@@ -600,11 +600,10 @@ function parseColor(color) {
 		//Hexadecimal
 		color = hexa2rgba((color + "00").slice(0, 9));
 	}
-	var ch = color.split(",");
-	ch = ch.map(elm => {
-		return elm.match(/[0-9.]+/)[0];
+	var ch = color.split(",").map(elm => {
+		return +elm.match(/[0-9.]+/)[0];
 	});
-	return new Color(ch[0], ch[1], ch[2], ch[3] || "1");
+	return new Color(ch[0], ch[1], ch[2], ch[3] || 1);
 }
 
 /**
@@ -714,11 +713,11 @@ function zip(...iterables) {
 /**
  * Create iterable range array.
  * @param {number} [start=0] Starting number of the sequence. Default value is 0
- * @param {number} stop Ending number of the sequence.
+ * @param {number} [stop] Ending number of the sequence.
  * @param {number} [step=1] difference between each number in the result. Default value is 1
  * @returns {number[]} Iterable Array object with given range.
  */
-function range(start = 0, stop, step = 1) {
+function range(start = 0, stop = undefined, step = 1) {
 	var array = new Array();
 
 	if(typeof stop === "undefined") {
@@ -782,9 +781,10 @@ const HIGHLIGHTER = {
  * @prop {boolean} [lineNumbers=true] Add line numbers
  * @prop {boolean} [style=true] Include CSS in result
  * @prop {boolean} [colorVariables=true] Colors as variables (can be then changed through CSS)
- * @prop {boolean} [fontSize=14] Font size
- * @prop {boolean} [lineHeight=18] Line Height
+ * @prop {number} [fontSize=14] Font size
+ * @prop {number} [lineHeight=18] Line Height
  * @prop {boolean} [allowSelection=true] Allow line selection
+ * @prop {boolean} [debug=true] Toggle debugging mode
  */
 
 // eslint-disable-next-line valid-jsdoc
@@ -1101,24 +1101,29 @@ Highlight.getColorVariablesCSS = function() {
 class Matrix {
 	/**
 	 * Useful to store Matrix data. Class contains methods to make operations with another Matrices.
-	 * @param {Array} matrix Array matrix or Number of rows.
+	 * @param {number | Array<number[]>} matrix Array matrix or Number of rows.
 	 * @param {number} cols Number of columns.
 	 */
 	constructor(matrix /*rows*/, cols = undefined) {
 		if(typeof matrix === "object") {
+			/**
+			 * @type {Array<number[]>}
+			 */
 			this.matrix = matrix;
+
+			/**
+			 * @type {number}
+			 */
 			this.rows = matrix.length;
+
+			/**
+			 * @type {number}
+			 */
 			this.cols = matrix[0].length;
 		} else if(typeof matrix === "number" && cols) {
 			this.rows = matrix;
 			this.cols = cols;
-			this.matrix = [];
-			for(var i = 0; i < this.rows; i++) {
-				this.matrix.push([]);
-				for(var j = 0; j < this.cols; j++) {
-					this.matrix[i][j] = 0;
-				}
-			}
+			this.matrix = /** @type {Array<number[]>} */(new Array(this.rows).fill(new Array(this.cols).fill(0)));
 		}
 	}
 
@@ -1355,6 +1360,15 @@ class Dimensions {
 var Dimension = Dimensions;
 
 class Color {
+
+	/**
+	 * Creates an instance of Color.
+	 * @param {number | Color} [red=0]
+	 * @param {number} [green=red]
+	 * @param {number} [blue=red]
+	 * @param {number} [alpha=1]
+	 * @memberof Color
+	 */
 	constructor(red = 0, green = red, blue = red, alpha = 1) {
 		if(red instanceof Color) {
 			//Copy
@@ -1362,7 +1376,7 @@ class Color {
 			this.g = +red.g;
 			this.b = +red.b;
 			this.a = +red.a;
-		} else if(isNaN(red)) {
+		} else if(isNaN(red) && typeof red === "string") {
 			//Parse
 			var color = Color.parse(red);
 
@@ -1423,21 +1437,21 @@ class Color {
 	 * @param {"RGB" | "RGBA" | "HEX" | "HEXA" | "HLS" | "HLSA"} format
 	 * @returns {string} color
 	 */
-	toString(format = "rgba") {
-		format = format.toLowerCase();
-
-		if(format == "hex") {
+	toString(format = "RGBA") {
+		if(format == "HEX") {
 			//HEX
 			return `#${fixDigits(this.r.toString(16))}${fixDigits(this.g.toString(16))}${fixDigits(this.b.toString(16))}`;
-		} else if(format == "hexa") {
+		} else if(format == "HEXA") {
 			//HEXA
 			return `#${fixDigits(this.r.toString(16))}${fixDigits(this.g.toString(16))}${fixDigits(this.b.toString(16))}${fixDigits(this.a.toString(16))}`;
-		} else if(format == "rgb") {
+		} else if(format == "RGB") {
 			//RGB
 			return `rgb(${this.r},${this.g},${this.b})`;
-		} else {
+		} else if(format == "RGBA") {
 			//RGBA
 			return `rgba(${this.r},${this.g},${this.b},${this.a})`;
+		} else {
+			throw new TypeError(`Invalid color format '${format}'`);
 		}
 	}
 
@@ -1460,21 +1474,21 @@ class Color {
 
 		//HEX
 		if(color.startsWith("#")) {
-			color = color.slice(1).split("");
+			const components = color.slice(1).split("");
 
 			//Add alpha channel
-			if(color.length == 3) color.push("f");
-			else if(color.length == 6) color.push("f", "f");
+			if(components.length == 3) components.push("f");
+			else if(components.length == 6) components.push("f", "f");
 
 			//Convert to RRGGBBAA
-			if(color.length == 4) {
-				for(var i = 0; i < 8; i += 2) color.splice(i, 0, color[i]);
+			if(components.length == 4) {
+				for(var i = 0; i < 8; i += 2) components.splice(i, 0, components[i]);
 			}
 
 			//Convert to RGBA
-			if(color.length == 8) {
+			if(components.length == 8) {
 				var c = [];
-				for(var i = 2; i <= 8; i += 2) c.push(parseInt("0x" + color.slice(i - 2, i).join("")));
+				for(var i = 2; i <= 8; i += 2) c.push(parseInt("0x" + components.slice(i - 2, i).join("")));
 
 				return new Color(c[0], c[1], c[2], c[3] / 255);
 			} else throw new TypeError(string + " is not a valid HEX color");
@@ -1502,7 +1516,7 @@ class Color {
 				var l = clamp(+match[4] / (match[5] ? 100 : 1), 0, 1);
 				var a = clamp(+match[6], 0, 1);
 
-				var r, g, b;
+				var r = 0, g = 0, b = 0;
 
 				if(isNaN(a)) a = 1;
 
@@ -1561,7 +1575,7 @@ class Color {
 class ComplexNumber {
 	/**
 	 * Creates new Complex Number object.
-	 * @param {string | Array<number, number>} number String to parse complex number.
+	 * @param {string | Array<number | string, number | string>} number String to parse complex number.
 	 * @param {string} sign Imaginary unit indicator
 	 */
 	constructor(number, sign = "i") {
@@ -1576,27 +1590,27 @@ class ComplexNumber {
 
 			i = i == sign ? "1" : i.replace(sign, "");
 		} else if(number instanceof Array) {
-			r = number[0];
-			i = number[1];
+			r = number[0].toString();
+			i = number[1].toString();
 		} else throw new TypeError(number + " is not a valid complex number");
 
 		/* Init */
 
 		/**
 		 * Real part of the number
-		 * @type {number}
+		 * @type {string}
 		 */
 		this.r = r;
 
 		/**
 		 * Imaginary part of the number
-		 * @type {number}
+		 * @type {string}
 		 */
 		this.i = i;
 
 		/**
 		 * Imaginary part identifier (usually `i` or `j`)
-		 * @type {number}
+		 * @type {string}
 		 */
 		this.sign = sign;
 
@@ -1604,14 +1618,21 @@ class ComplexNumber {
 		 * Distance of number from origin
 		 * @type {number}
 		 */
-		this.distance = Math.hypot(this.r, this.i);
+		this.distance = Math.hypot(+this.r, +this.i);
 
 		/**
 		 * Angle between origin and number
 		 * @type {number}
 		 */
-		this.angle = Math.atan(this.i / this.r);
+		this.angle = Math.atan(+this.i / +this.r);
 	}
+
+	/**
+	 *
+	 * @param {ComplexNumber} x
+	 * @return {ComplexNumber} 
+	 * @memberof ComplexNumber
+	 */
 	add(x) {
 		if(this.sign != x.sign) throw new TypeError("Cannot add two numbers with different imaginary numbers");
 
@@ -1620,31 +1641,59 @@ class ComplexNumber {
 
 		return new ComplexNumber([r.toString(), c.toString()], this.sign);
 	}
+
+	/**
+	 *
+	 * @param {ComplexNumber} x
+	 * @return {ComplexNumber} 
+	 * @memberof ComplexNumber
+	 */
 	sub(x) {
 		if(this.sign != x.sign) throw new TypeError("Cannot subtract two numbers with different imaginary numbers");
 
-		var r = this.r - x.r;
-		var c = this.i - x.i;
+		var r = +this.r - +x.r;
+		var c = +this.i - +x.i;
 
 		return new ComplexNumber([r.toString(), c.toString()], this.sign);
 	}
+
+	/**
+	 *
+	 * @param {ComplexNumber} x
+	 * @return {ComplexNumber} 
+	 * @memberof ComplexNumber
+	 */
 	mult(x) {
 		if(this.sign != x.sign) throw new TypeError("Cannot multiply two numbers with different imaginary numbers");
 
-		var r = this.r * x.r - this.i * x.i;
-		var c = this.r * x.i + x.r * this.i;
+		var r = +this.r * +x.r - +this.i * +x.i;
+		var c = +this.r * +x.i + +this.i * +x.r;
 
 		return new ComplexNumber([r.toString(), c.toString()], this.sign);
 	}
+
+	/**
+	 *
+	 * @param {ComplexNumber} x
+	 * @return {ComplexNumber} 
+	 * @memberof ComplexNumber
+	 */
 	div(x) {
 		if(this.sign != x.sign) throw new TypeError("Cannot divide two numbers with different imaginary numbers");
 
-		var r = this.r * x.r + this.i * x.i;
-		var c = this.i * x.r - this.r * x.i;
-		var d = x.r * x.r + x.i * x.i;
+		var r = +this.r * +x.r + +this.i * +x.i;
+		var c = +this.i * +x.r - +this.r * +x.i;
+		var d = +x.r * +x.r + +x.i * +x.i;
 
 		return new ComplexNumber([r + "/" + d, c + "/" + d], this.sign);
 	}
+
+	/**
+	 *
+	 * @param {"a" | "t" | "e"} form
+	 * @return {string} 
+	 * @memberof ComplexNumber
+	 */
 	toString(form = "a") {
 		if(form == "a") return `${this.r}${this.i.replace(/^([^+\-])/, " + $1")}${this.sign}`;
 		else if(form == "t") return `${this.distance.toFixed(2)} * (cos(${~~rad2deg(this.angle)}°) + ${this.sign} * sin(${~~rad2deg(this.angle)}°))`;
@@ -1681,7 +1730,7 @@ class EventListener {
 	 * Fires specific event
 	 * @param {string} type Event type
 	 * @param {Object<string, any> | EventListener.Event} [data={}] Custom event data
-	 * @param {(event: EventListener.Event) => any} [callback=null] Default action handler
+	 * @param {(event: EventListener.Event) => void} [callback=null] Default action handler
 	 * @returns {any | undefined} Returned value of the callback function
 	 */
 	dispatchEvent(type, data = {}, callback = null) {
@@ -1782,10 +1831,11 @@ EventListener.Listener = class Listener {
 };
 
 class EventListenerStatic {
+	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Add event handler for specific event
 	 * @param {string} type Event type
-	 * @param {EventHandler} callback Event callback
+	 * @param {(event: EventListener.Event) => void} callback Event callback
 	 * @returns {EventListener.Listener} Event listener object
 	 */
 	static addEventListener(type, callback) {
@@ -1794,12 +1844,13 @@ class EventListenerStatic {
 		return listener;
 	}
 
+	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Fires specific event
 	 * @param {string} type Event type
-	 * @param {Object|EventListener.Event} [data={}] Custom event data
-	 * @param {Function} [callback=null] Default action handler
-	 * @returns {any|undefined} Returned value of the callback function
+	 * @param {Object<string, any> | EventListener.Event} [data={}] Custom event data
+	 * @param {(event: EventListener.Event) => void} [callback=null] Default action handler
+	 * @returns {any | undefined} Returned value of the callback function
 	 */
 	static dispatchEvent(type, data = {}, callback = null) {
 		//Setup Event Object
