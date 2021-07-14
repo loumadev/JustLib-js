@@ -4,11 +4,12 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-07-13T14:35:29+02:00
+ * Last Modified: 2021-07-14T16:05:01+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
 
+// @ts-check
 
 "use strict";
 
@@ -658,10 +659,12 @@ function timeout(time) {
 	return new Promise(resolve => setTimeout(resolve, time));
 }
 
+// eslint-disable-next-line valid-jsdoc
 /**
  * Create iterable key-value pairs.
- * @param {any} iterable Iterable Object, Array or any other value.
- * @returns {any} Iterator
+ * @template T
+ * @param {T[] | T} iterable Iterable Object, Array or any other value.
+ * @returns {T extends { [key: string]: any } ? [number, keyof T, T[keyof T]][] : [number, T][]} Iterator
  * @example
  * iterate([4, 5, 6]); //[[0, 4], [1, 5], [2, 6]]
  * iterate([]); //[]
@@ -676,11 +679,10 @@ function timeout(time) {
  */
 function iterate(iterable) {
 	if(iterable === undefined || iterable === null) return [];
-	if(iterable instanceof Array || typeof iterable === "string" && (iterable = [...iterable])) return iterable.entries();
-	else {
-		var iterator = Object.entries(iterable).map((value, i) => [i, ...value]);
-		return iterator.length || iterable.constructor === Object ? iterator : [[0, iterable]];
-	}
+	else if(typeof iterable === "string") return /** @type {any} */([...iterable].map((char, i) => [i, char]));
+	else if(iterable instanceof Array) return /** @type {any} */(iterable.map((value, i) => [i, value]));
+	else if(iterable.constructor === Object) return /** @type {any} */(Object.entries(iterable).map(([key, value], i) => [i, key, value]));
+	else return /** @type {any} */([[0, iterable]]);
 }
 
 /**
