@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-07-14T16:05:01+02:00
+ * Last Modified: 2021-07-14T17:02:13+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -685,10 +685,12 @@ function iterate(iterable) {
 	else return /** @type {any} */([[0, iterable]]);
 }
 
+// eslint-disable-next-line valid-jsdoc
 /**
  * Zips multiple iterators
- * @param  {...any} iterables 
- * @returns {any} Iterator
+ * @template A, B, C, D, E
+ * @param {[A[]?, B[]?, C[]?, D[]?, E[]?]} iterables
+ * @returns {[A?, B?, C?, D?, E?][]} Iterator
  * @example
  * zip(["John", "Charles", "Mike"], ["Jenny", "Christy", "Monica"]); //[["John", "Jenny"], ["Charles", "Christy"], ["Mike", "Monica"]]
  * zip([1, "a"], [2, "b"], [3]) //[1, 2, 3] -> "c" is missing
@@ -706,7 +708,7 @@ function zip(...iterables) {
 		}
 	}
 
-	return iterator;
+	return /** @type {any} */(iterator);
 }
 
 /**
