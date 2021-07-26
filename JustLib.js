@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-07-26T18:26:17+02:00
+ * Last Modified: 2021-07-26T22:25:09+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -338,7 +338,7 @@ function clamp(number, min = 0, max = 1) {
 }
 
 /**
- * @deprecated Use `clamp(...) instead`
+ * @deprecated Use `clamp(...)` instead
  */
 var fit = clamp;
 
@@ -665,16 +665,16 @@ function timeout(time) {
  * @param {T[] | T} iterable Iterable Object, Array or any other value.
  * @returns {T !extends { [key: string]: any } ? [number, T][] : [number, keyof T, T[keyof T]][]} Iterator
  * @example
- * iterate([4, 5, 6]); //[[0, 4], [1, 5], [2, 6]]
- * iterate([]); //[]
- * iterate({a: 4, b: 5, c: 6}); //[[0, "a", 4], [1, "b", 5], [2, "c", 6]]
- * iterate({}); //[]
- * iterate("bar"); //[[0, "b"], [1, "a"], [2, "r"]]
- * iterate(11); //[[0, 11]]
- * iterate(true); //[[0, true]]
- * iterate(false); //[[0, false]]
- * iterate(null); //[]
- * iterate(undefined); //[]
+ * iterate([4, 5, 6]);           // [[0, 4], [1, 5], [2, 6]]
+ * iterate([]);                  // []
+ * iterate({a: 4, b: 5, c: 6});  // [[0, "a", 4], [1, "b", 5], [2, "c", 6]]
+ * iterate({});                  // []
+ * iterate("bar");               // [[0, "b"], [1, "a"], [2, "r"]]
+ * iterate(11);                  // [[0, 11]]
+ * iterate(true);                // [[0, true]]
+ * iterate(false);               // [[0, false]]
+ * iterate(null);                // []
+ * iterate(undefined);           // []
  */
 function iterate(iterable) {
 	if(iterable === undefined || iterable === null) return [];
