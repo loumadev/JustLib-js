@@ -663,7 +663,7 @@ function timeout(time) {
  * Create iterable key-value pairs.
  * @template T
  * @param {T[] | T} iterable Iterable Object, Array or any other value.
- * @returns {T extends { [key: string]: any } ? [number, keyof T, T[keyof T]][] : [number, T][]} Iterator
+ * @returns {T !extends { [key: string]: any } ? [number, T][] : [number, keyof T, T[keyof T]][]} Iterator
  * @example
  * iterate([4, 5, 6]); //[[0, 4], [1, 5], [2, 6]]
  * iterate([]); //[]
