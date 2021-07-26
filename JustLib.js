@@ -928,7 +928,7 @@ function Highlight(str, {
 
 				positions.push([pos, color, pos + group.length]);
 
-				return;
+				return match;
 			});
 		}
 
@@ -1410,7 +1410,7 @@ class Color {
 	 * @param {number} [alpha=1]
 	 * @memberof Color
 	 */
-	constructor(red = 0, green = red, blue = red, alpha = 1) {
+	constructor(red = 0, green = 0, blue = 0, alpha = 1) {
 		if(red instanceof Color) {
 			//Copy
 			this.r = +red.r;
@@ -1428,8 +1428,8 @@ class Color {
 		} else {
 			//Create new
 			this.r = +red;
-			this.g = +green;
-			this.b = +blue;
+			this.g = typeof green === "undefined" ? +red : +green;
+			this.b = typeof blue === "undefined" ? +red : +blue;
 			this.a = +alpha;
 		}
 	}
