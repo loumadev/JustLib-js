@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-07-14T19:13:42+02:00
+ * Last Modified: 2021-07-26T18:26:17+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -406,7 +406,7 @@ function loopRegex(text, regex, callback) {
 
 	if(flags.indexOf("g") < 0) regex = new RegExp(regex, flags + "g");
 	while((match = regex.exec(/** @type {string} */(text))) != null) {
-		if(i > 10000) throw new Error("Infinte loop");
+		if(i > 10000) throw new Error("Infinite loop");
 		callback(match);
 		i++;
 	}
@@ -553,7 +553,7 @@ function randomGaussian(min, max, skew = 1) {
 }
 
 /**
- * Returns destance between two Vectors.
+ * Returns distance between two Vectors.
  * @param {Vector} v1 Minimal number.
  * @param {Vector} v2 Maximal number.
  * @returns {number}
@@ -565,7 +565,7 @@ function distance(v1, v2) {
 }
 
 /**
- * Returns destance between two Vectors.
+ * Returns angle between two Vectors.
  * @param {Vector} v1 Minimal number.
  * @param {Vector} v2 Maximal number.
  * @returns {number}
@@ -1307,7 +1307,7 @@ class Matrix {
 	}
 
 	/**
-	 * Trasnforms Matrix into 1D array.
+	 * Transforms Matrix into 1D array.
 	 * @returns {number[]} new Array.
 	 */
 	toArray() {
@@ -1321,7 +1321,7 @@ class Matrix {
 	}
 
 	/**
-	 * Trasnforms Matrix into Vector object.
+	 * Transforms Matrix into Vector object.
 	 * @returns {Vector} Vector object.
 	 */
 	toVector() {
@@ -1438,7 +1438,7 @@ class Color {
 	/**
 	 * Calls a defined callback function on each color channel, and returns new Color object that contains the results.
 	 * @param {(value: number, channel: string, thisArg: Color) => number} callback A function that accepts up to three arguments. The map method calls the callbackfn function one time for each color channel.
-	 * @param {boolean} alpha Decide to use also alpha channel. Defaultly false.
+	 * @param {boolean} [alpha=false] Decide to use also alpha channel.
 	 * @returns {Color} new Color object
 	 */
 	map(callback, alpha = false) {
@@ -1473,9 +1473,9 @@ class Color {
 
 	/**
 	 * Returns a string representing the color using specified format
-	 * Supported formats: RGB, RGBA, HEX, HEXA, HLS, HLSA
+	 * Supported formats: RGB, RGBA, HEX, HEXA, HLS, HSLA
 	 * Default format: RGBA
-	 * @param {"RGB" | "RGBA" | "HEX" | "HEXA" | "HLS" | "HLSA"} format
+	 * @param {"RGB" | "RGBA" | "HEX" | "HEXA" | "HLS" | "HSLA"} format
 	 * @returns {string} color
 	 */
 	toString(format = "RGBA") {
@@ -1506,7 +1506,7 @@ class Color {
 
 	/**
 	 * Parses color string
-	 * Supported formats: RGB, RGBA, HEX, HEXA, HLS, HLSA
+	 * Supported formats: RGB, RGBA, HEX, HEXA, HLS, HSLA
 	 * @param {string} string color string
 	 * @returns {Color} parsed color
 	 */
@@ -1587,7 +1587,7 @@ class Color {
 					.map(e => map(s, 0, 1, 128, e)) //Saturation
 					.map(e => map(l, 0.5, l > 0.5 ? 1 : 0, e, l > 0.5 ? 255 : 0)) //Lightness
 					.map(e => Math.round(e));
-			} else throw new TypeError(string + " is not a valid HLSA format");
+			} else throw new TypeError(string + " is not a valid HSLA format");
 		} else throw new TypeError(string + " is not a valid color type");
 	}
 
@@ -1739,7 +1739,7 @@ class ComplexNumber {
 		if(form == "a") return `${this.r}${this.i.replace(/^([^+\-])/, " + $1")}${this.sign}`;
 		else if(form == "t") return `${this.distance.toFixed(2)} * (cos(${~~rad2deg(this.angle)}°) + ${this.sign} * sin(${~~rad2deg(this.angle)}°))`;
 		else if(form == "e") return `${this.distance.toFixed(2)} * e^(${this.sign} * ${~~rad2deg(this.angle)}°)`;
-		else throw new TypeError("Unknown number form. Supported a = algebric, t = trigonometric, e = exponential");
+		else throw new TypeError("Unknown number form. Supported a = algebraic, t = trigonometric, e = exponential");
 	}
 }
 
@@ -1819,7 +1819,7 @@ class EventListener {
 	/**
 	 * Removes event handler
 	 * @param {EventListener.Listener} listener Event listener returned by EventListener.addEventListener()
-	 * @returns {boolean} Returns true if listener was removed successfuly
+	 * @returns {boolean} Returns true if listener was removed successfully
 	 */
 	removeEventListener(listener) {
 		for(var elm of this.listeners) {
@@ -1933,7 +1933,7 @@ class EventListenerStatic {
 	/**
 	 * Removes event handler
 	 * @param {EventListener.Listener} listener Event listener returned by EventListener.addEventListener()
-	 * @returns {boolean} Returns true if listener was removed successfuly
+	 * @returns {boolean} Returns true if listener was removed successfully
 	 */
 	static removeEventListener(listener) {
 		for(var elm of this.listeners) {
