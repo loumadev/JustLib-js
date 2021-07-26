@@ -730,6 +730,47 @@ function range(start = 0, stop = undefined, step = 1) {
 	return array;
 }
 
+// eslint-disable-next-line valid-jsdoc
+/**
+ * Uniquifies input value.
+ * 
+ * If the input value `x` is `Iterable` it eliminates duplicates from a list.
+ * If the input value `x` is `Object` literal it creates shallow copy of the Object.
+ * If the input value `x` is primitive it will be returned unchanged.
+ * 
+ * Special case: If the input value `x` is `string` it is splitted into char array and duplicates are removed.
+ * @template T
+ * @param {T} x Any value (should be Iterable (Array or String) or Object literal)
+ * @return {T extends string ? string[] : T} 
+ * @example
+ * const o = {foo: "bar"};
+ * 
+ * uniquify(0);             // 0
+ * uniquify(8);             // 8
+ * uniquify(true);          // true
+ * uniquify(false);         // false
+ * uniquify(null);          // null
+ * uniquify(undefined);     // undefined
+ * uniquify("");            // []
+ * uniquify("test");        // ["t", "e", "s"]
+ * uniquify([1, 2, 3]);     // [1, 2, 3] != x
+ * uniquify([1, 2, 3, 2, 3, 3, 1]);  // [1, 2, 3]
+ * uniquify([o, {"baz":"fab"}, o]);  // [{"foo":"bar"} == o, {"baz":"fab"}]
+ * uniquify([{"boo":"faz"}, {"boo":"faz"}]);  // [{"boo":"faz"}, {"boo":"faz"}] != x
+ * uniquify(o);             // {"foo":"bar"} != o
+ * uniquify({"bar":"baz"}); // {"bar":"baz"} != x
+ */
+function uniquify(x) {
+	if(x === null || x === undefined) return /** @type {any} */(x);
+	if(x[Symbol.iterator]) return /** @type {any} */([...new Set(/** @type {any} */(x))]);
+	if(x.constructor === Object) {
+		const obj = /** @type {any} */({});
+		for(const key in x) obj[key] = x[key];
+		return obj;
+	}
+	return /** @type {any} */(x);
+}
+
 
 function copyToClipboard(text) {
 	var node = document.createElement("textarea");
@@ -2364,6 +2405,7 @@ if(typeof module !== "undefined") {
 		iterate,
 		zip,
 		range,
+		uniquify,
 		copyToClipboard,
 		Highlight,
 		createSlider,
