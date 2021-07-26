@@ -898,9 +898,9 @@ function Highlight(str, {
 				regex = regex.replace(/==>[0-9]*$/, "");
 			}
 
-			regex = regex.replace(/\${(.*?)}/gm, (match, variable) => {
-				return defaults[variable];
-			});
+			// regex = regex.replace(/\${(.*?)}/gm, (match, variable) => {
+			// 	return defaults[variable];
+			// });
 
 			var regexp = new RegExp(regex, "gm");
 			if(debug) console.log(regexp);
