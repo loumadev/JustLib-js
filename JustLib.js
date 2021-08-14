@@ -2428,6 +2428,7 @@ if(typeof module !== "undefined") {
 		abs,
 		ANGLES,
 		TRANSPARENT,
-		SCROLL_SMOOTH_CENTER
+		SCROLL_SMOOTH_CENTER,
+		SCROLL_SMOOTH_TOP
 	};
 }
