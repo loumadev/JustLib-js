@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-07-26T22:25:09+02:00
+ * Last Modified: 2021-08-15T01:51:36+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -2266,6 +2266,7 @@ const ANGLES = {
 	cos: new Float32Array(360 * _angle_precision),
 };
 const SCROLL_SMOOTH_CENTER = {behavior: "smooth", block: "center", inline: "center"};
+const SCROLL_SMOOTH_TOP = {behavior: "smooth", top: 0};
 const TRANSPARENT = new Color(0, 0, 0, 0);
 const COLLISION = {
 	/**
