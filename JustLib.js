@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-08-21T15:32:50+02:00
+ * Last Modified: 2021-08-21T16:30:50+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1958,6 +1958,9 @@ class RandomGenerator {
 	constructor(seed = ~~(Math.random() * 2147483647)) {
 		this.setSeed(seed);
 		this.initialSeed = this.currentSeed;
+
+		/** @type {((bound: number) => number) & ((origin: number, bound: number) => number)} */
+		this.nextInt;
 	}
 
 	/**
@@ -1973,14 +1976,48 @@ class RandomGenerator {
 	}
 
 	/**
-	 * Generates next number in sequence.
-	 * @returns {number} Random number in sequence.
+	 * Generates next floating point number in sequence.
+	 * @returns {number} Random number in sequence (in range [0.0, 1.0]).
 	 */
 	next() {
 		return (((this.currentSeed = (this.currentSeed * 16807) % 2147483647) - 1) / 2147483646);
 	}
+
+	/**
+	 * Generates next floating point number in sequence.
+	 * @param {number} origin
+	 * @param {number} [bound]
+	 * @returns {number} Random number in sequence (in range [0.0, bound-1] or [origin, bound]).
+	 */
+	nextFloat(origin, bound) {
+		if(bound == undefined) {
+			return this.next() * origin;
+		}
+
+		return this.next() * (bound - origin + 1) + origin;
+	}
+
+	/**
+	 * Generates next integer in sequence.
+	 * @param {number} origin
+	 * @param {number} [bound]
+	 * @returns {number} Random number in sequence (in range [0, bound-1] or [origin, bound]).
+	 */
+	nextInt(origin, bound) {
+		return ~~this.nextFloat(origin, bound);
+	}
+
+	/**
+	 * Generates next random boolean in sequence.
+	 * @returns {boolean} Random boolean.
+	 */
+	nextBoolean() {
+		return this.next() < 0.5;
+	}
 }
 
+// var gen = new RandomGenerator();
+// gen.nextInt();
 
 /**
  * Allows to create area for dropping files and data
