@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-08-15T01:51:36+02:00
+ * Last Modified: 2021-08-21T15:32:50+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1954,26 +1954,30 @@ EventListenerStatic.on = EventListenerStatic.addEventListener;
 /**
  * Seedable random number generator.
  */
-class Random {
+class RandomGenerator {
+	constructor(seed = ~~(Math.random() * 2147483647)) {
+		this.setSeed(seed);
+		this.initialSeed = this.currentSeed;
+	}
+
 	/**
 	 * Set seed of generator.
 	 * @param {number} seed Seed of sequence, must be an integer!
 	 * @returns {number} seed.
 	 */
-	static setSeed(seed = ~~(Math.random() * 2147483647)) {
+	setSeed(seed) {
+		if(typeof seed !== "number") throw new TypeError("Seed " + seed + " is not valid number");
 		if((seed = seed % 2147483647) <= 0) seed += 2147483646;
 
-		return (Random.seed = seed);
+		return (this.currentSeed = seed);
 	}
 
 	/**
-	 * Generates random number in sequence.
+	 * Generates next number in sequence.
 	 * @returns {number} Random number in sequence.
 	 */
-	static generate() {
-		if(!Random.seed) return Random.setSeed(), Random.generate();
-
-		return (((Random.seed = (Random.seed * 16807) % 2147483647) - 1) / 2147483646);
+	next() {
+		return (((this.currentSeed = (this.currentSeed * 16807) % 2147483647) - 1) / 2147483646);
 	}
 }
 
@@ -2344,7 +2348,7 @@ if(typeof module !== "undefined") {
 		EventListener,
 		EventListenerStatic,
 		Matrix,
-		Random,
+		RandomGenerator,
 		DropArea,
 		Vector,
 
