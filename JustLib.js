@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-08-21T16:30:50+02:00
+ * Last Modified: 2021-08-23T17:48:41+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1020,8 +1020,8 @@ function Highlight(str, {
 	var lines = str.split("\n");
 
 	for(var i = 0; i < lines.length; i++) {
-		if(lineNumbers) lines[i] = `<tr class="highlight-tr"><td class="highlight-line"><div class="highlight-div">${i + 1}</div></td><td class="highlight-code"><pre class="highlight-pre" ${failed ? 'style="color: white;"' : ""}>${lines[i].replace(/\r/g, "")}</pre></td></tr>`;
-		else lines[i] = `<tr class="highlight-tr"><td class="highlight-code"><pre class="highlight-pre" ${failed ? 'style="color: white;"' : ""}>${lines[i].replace(/\r/g, "")}</pre></td></tr>`;
+		const lineNumber = lineNumbers ? `<td class="highlight-line"><div class="highlight-div">${i + 1}</div></td>` : "";
+		lines[i] = `<tr class="highlight-tr">${lineNumber}<td class="highlight-code"><pre class="highlight-pre" ${failed ? 'style="color: white;"' : ""}>${lines[i].replace(/\r/g, "") || "<br>"}</pre></td></tr>`;
 
 		if(indentLines) {
 			if(debug) console.log(lines[i]);
