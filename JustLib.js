@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-08-23T17:48:41+02:00
+ * Last Modified: 2021-08-23T19:01:33+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1144,7 +1144,10 @@ function Highlight(str, {
 			${style ? '<style class="highlight-style">' + css + "</style>" : ""}
 			<table class="highlight-table">${lines.join("")}</table>
 		</div>
-	`);
+	`)
+		.replace(/\s{2,}/g, " ")
+		.replace(/(\n|\r)/g, "")
+		.trim();
 }
 Highlight.getColorVariablesCSS = function() {
 	return HIGHLIGHTER.reduce((prev, {key, value}) => prev + "--" + key + ": " + value + ";\n", "");
