@@ -994,6 +994,7 @@ function Highlight(str, {
 
 	const TAB = range(tabSize).reduce(prev => prev + "&nbsp;", "");
 	const INDENT = "<span class=\"highlight-indent\"></span>";
+	const BR = "<br>";
 
 	str = str.replace(/\t/g, TAB/*"&nbsp;&nbsp;&nbsp;&nbsp;"*/);
 	str = str.replace(/  /g, "&nbsp;&nbsp;");
@@ -1027,13 +1028,23 @@ function Highlight(str, {
 			if(debug) console.log(lines[i]);
 			//var tabs = (lines[i].match(/<pre>(&nbsp;)*/) || [""])[0].split(/&nbsp;/).length - 1;
 			//lines[i] = lines[i].replace(indentRegex, '$1<span style="border-left:1px solid #505050;position:absolute;height: 19px;"></span>$2');
-			lines[i] = lines[i].replace(/(<pre.*?>|<span style=".*?">)((&nbsp;)+)/, (match, before, tabs) => {
-				var len = tabs.split(/&nbsp;/).length - 1;
+			lines[i] = lines[i].replace(/(<pre.*?>|<span style=".*?">)((?:&nbsp;)+|<br>)/, (match, before, tabs) => {
+				const isEmptyLine = tabs == BR;
+				let len = 0;
 
-				var indent = range(0, len - len % tabSize, tabSize).reduce(prev => prev + INDENT + TAB, "");
-				var remain = range(len % tabSize).reduce(prev => prev + "&nbsp;", "");
+				if(isEmptyLine && lines[i - 1]) {
+					len = (lines[i - 1].split(INDENT).length - 1) * tabSize;
+				} else {
+					len = tabs.split(/&nbsp;/).length - 1;
+				}
 
-				return before + indent + remain;
+				const indent = (INDENT + TAB).repeat(len / tabSize);
+				const remain = "&nbsp;".repeat(len % tabSize);
+				const newLine = isEmptyLine && len == 0 ? BR : "";
+				//var indent = range(0, len - len % tabSize, tabSize).reduce(prev => prev + INDENT + TAB, "");
+				//var remain = range(len % tabSize).reduce(prev => prev + "&nbsp;", "");
+
+				return before + indent + remain + newLine;
 			});
 			if(debug) console.log(lines[i]);
 			//((&nbsp;){4})(?=<pre>|&nbsp;)
