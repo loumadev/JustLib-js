@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-08-29T15:04:44+02:00
+ * Last Modified: 2021-08-29T17:58:09+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -335,6 +335,21 @@ function map(number, fromMin, fromMax, toMin = 0, toMax = 1) {
  */
 function clamp(number, min = 0, max = 1) {
 	return number < min ? min : number > max ? max : number;
+}
+
+/**
+ * Wraps number around specified range.
+ * @param {number} x Number to be wrapped.
+ * @param {number} [min=0] Minimal number (Default: 0).
+ * @param {number} [max=1] Maximal number (Default: 1).
+ * @param {boolean} [includeMax=true] (Default: true).
+ * @returns {number}
+ */
+function wrap(x, min = 0, max = 1, includeMax = true) {
+	if(includeMax) max += 1;
+
+	const d = max - min;
+	return ((x - min) % d + d) % d + min;
 }
 
 /**
@@ -2450,6 +2465,7 @@ if(typeof module !== "undefined") {
 		map,
 		fit,
 		clamp,
+		wrap,
 		arrContains,
 		shuffleArray,
 		indexOf,
