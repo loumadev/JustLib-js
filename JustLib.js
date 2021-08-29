@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-08-23T19:01:33+02:00
+ * Last Modified: 2021-08-29T15:00:49+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -2028,10 +2028,21 @@ class RandomGenerator {
 	nextBoolean() {
 		return this.next() < 0.5;
 	}
-}
 
-// var gen = new RandomGenerator();
-// gen.nextInt();
+	shuffle(array) {
+		let length = array.length;
+
+		while(length) {
+			const index = this.nextInt(length--);
+			const temp = array[length];
+
+			array[length] = array[index];
+			array[index] = temp;
+		}
+
+		return array;
+	}
+}
 
 /**
  * Allows to create area for dropping files and data
