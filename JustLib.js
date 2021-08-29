@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-08-29T15:00:49+02:00
+ * Last Modified: 2021-08-29T15:04:44+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -2029,6 +2029,13 @@ class RandomGenerator {
 		return this.next() < 0.5;
 	}
 
+	/**
+	 * Shuffles input array elements randomly
+	 * @template T
+	 * @param {T[]} array
+	 * @return {T[]} 
+	 * @memberof RandomGenerator
+	 */
 	shuffle(array) {
 		let length = array.length;
 
