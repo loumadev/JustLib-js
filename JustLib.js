@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-08-29T17:58:09+02:00
+ * Last Modified: 2021-08-29T18:01:37+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -311,16 +311,16 @@ function getQueryParameters(string = window.location.search) {
 
 /**
  * Converts number from one range to another.
- * @param {number} number Number to be mapped.
+ * @param {number} x Number to be mapped.
  * @param {number} fromMin Starting range of the input number.
  * @param {number} fromMax Ending range of the input number.
- * @param {number} toMin Starting range of output number (Default: 0).
- * @param {number} toMax Ending range of output number (Default: 1).
+ * @param {number} [toMin=0] Starting range of output number (Default: 0).
+ * @param {number} [toMax=1] Ending range of output number (Default: 1).
  * @returns {number}
  */
-function map(number, fromMin, fromMax, toMin = 0, toMax = 1) {
+function map(x, fromMin, fromMax, toMin = 0, toMax = 1) {
 	return (
-		(number * toMax - number * toMin - fromMin * toMax + fromMin * toMin) /
+		(x * toMax - x * toMin - fromMin * toMax + fromMin * toMin) /
 		(fromMax - fromMin) +
 		toMin
 	);
@@ -328,13 +328,13 @@ function map(number, fromMin, fromMax, toMin = 0, toMax = 1) {
 
 /**
  * Converts number from one range to another.
- * @param {number} number Number to be mapped.
- * @param {number} min Minimal number (Default: 0).
- * @param {number} max Maximal number (Default: 1).
+ * @param {number} x Number to be clamped.
+ * @param {number} [min=0] Minimal number (Default: 0).
+ * @param {number} [max=1] Maximal number (Default: 1).
  * @returns {number}
  */
-function clamp(number, min = 0, max = 1) {
-	return number < min ? min : number > max ? max : number;
+function clamp(x, min = 0, max = 1) {
+	return x < min ? min : x > max ? max : x;
 }
 
 /**
