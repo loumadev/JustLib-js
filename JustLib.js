@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-08-29T18:01:37+02:00
+ * Last Modified: 2021-09-18T21:02:19+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1193,7 +1193,14 @@ class Matrix {
 		} else if(typeof matrix === "number" && cols) {
 			this.rows = matrix;
 			this.cols = cols;
-			this.matrix = /** @type {Array<number[]>} */(new Array(this.rows).fill(new Array(this.cols).fill(0)));
+
+			this.matrix = [];
+			for(var i = 0; i < this.rows; i++) {
+				this.matrix.push([]);
+				for(var j = 0; j < this.cols; j++) {
+					this.matrix[i][j] = 0;
+				}
+			}
 		}
 	}
 
