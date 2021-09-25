@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-09-18T21:02:19+02:00
+ * Last Modified: 2021-09-26T00:54:21+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1807,16 +1807,18 @@ class EventListener {
 	 * Fires specific event
 	 * @param {string} type Event type
 	 * @param {Object<string, any> | EventListener.Event} [data={}] Custom event data
-	 * @param {(event: EventListener.Event) => void} [callback=null] Default action handler
-	 * @returns {any | undefined} Returned value of the callback function
+	 * @param {(event: EventListener.Event) => any} [callback=null] Default action handler
+	 * @returns {any | undefined | Promise<any | undefined>} Returned value of the callback function
 	 */
 	dispatchEvent(type, data = {}, callback = null) {
 		//Setup Event Object
 		const defaultData = {
 			type: type,
 			time: new Date(),
-			defaultPreventable: !!callback,
+			defaultPreventable: !!callback
 		};
+
+		/** @type {EventListener.Event} */
 		let eventObject;
 
 		//Add data to an object
@@ -1836,20 +1838,29 @@ class EventListener {
 		}
 
 		//Run all listener's callbacks
-		for(var listener of this.listeners) {
-			if(eventObject.isStopped) break;
-			if(listener.type != type) continue;
+		const promises = [];
+		return new Promise(async (resolve, reject) => {
+			for(var listener of this.listeners) {
+				if(eventObject.isStopped) break;
+				if(listener.type != type) continue;
 
-			try {
-				eventObject.hasListener = true;
-				listener.callback(eventObject);
-			} catch(e) {
-				console.error(e);
+				try {
+					eventObject.hasListener = true;
+
+					if(eventObject.async && !eventObject.parallel) await listener.callback(eventObject);
+					else promises.push(listener.callback(eventObject));
+				} catch(e) {
+					console.error(e);
+				}
 			}
-		}
-
-		//Call callback and return data returned by default callback
-		if(!eventObject.defaultPrevented && callback) return callback(eventObject);
+			resolve();
+		}).then(() => {
+			const canRunCallback = !eventObject.defaultPrevented && !!callback;
+			if(eventObject.async && eventObject.parallel) return Promise.all(promises).then(() => {
+				if(canRunCallback) return callback(eventObject);
+			});
+			if(canRunCallback) return callback(eventObject);
+		});
 	}
 
 	/**
@@ -1874,14 +1885,21 @@ EventListener.Event = class Event {
 		this.defaultPrevented = false;
 		this.isStopped = false;
 		this.hasListener = false;
+		this.async = false;
+		this.parallel = false;
 
 		//Add data to Event Object
+		let hasParallelOption = false;
 		for(const obj of data) {
 			if(typeof obj !== "object") throw new TypeError("Expected object instead got " + obj);
 			for(const property in obj) {
 				this[property] = obj[property];
+				if(property == "parallel") hasParallelOption = true;
 			}
 		}
+
+		//In case there is no parallel option set, set it to `true` as default
+		if(this.async && !hasParallelOption) this.parallel = true;
 	}
 
 	preventDefault() {
@@ -1926,16 +1944,18 @@ class EventListenerStatic {
 	 * Fires specific event
 	 * @param {string} type Event type
 	 * @param {Object<string, any> | EventListener.Event} [data={}] Custom event data
-	 * @param {(event: EventListener.Event) => void} [callback=null] Default action handler
-	 * @returns {any | undefined} Returned value of the callback function
+	 * @param {(event: EventListener.Event) => any} [callback=null] Default action handler
+	 * @returns {any | undefined | Promise<any | undefined>} Returned value of the callback function
 	 */
 	static dispatchEvent(type, data = {}, callback = null) {
 		//Setup Event Object
 		const defaultData = {
 			type: type,
 			time: new Date(),
-			defaultPreventable: !!callback,
+			defaultPreventable: !!callback
 		};
+
+		/** @type {EventListener.Event} */
 		let eventObject;
 
 		//Add data to an object
@@ -1950,20 +1970,29 @@ class EventListenerStatic {
 		}
 
 		//Run all listener's callbacks
-		for(var listener of this.listeners) {
-			if(eventObject.isStopped) break;
-			if(listener.type != type) continue;
+		const promises = [];
+		return new Promise(async (resolve, reject) => {
+			for(var listener of this.listeners) {
+				if(eventObject.isStopped) break;
+				if(listener.type != type) continue;
 
-			try {
-				eventObject.hasListener = true;
-				listener.callback(eventObject);
-			} catch(e) {
-				console.error(e);
+				try {
+					eventObject.hasListener = true;
+
+					if(eventObject.async && !eventObject.parallel) await listener.callback(eventObject);
+					else promises.push(listener.callback(eventObject));
+				} catch(e) {
+					console.error(e);
+				}
 			}
-		}
-
-		//Call callback and return data returned by default callback
-		if(!eventObject.defaultPrevented && callback) return callback(eventObject);
+			resolve();
+		}).then(() => {
+			const canRunCallback = !eventObject.defaultPrevented && !!callback;
+			if(eventObject.async && eventObject.parallel) return Promise.all(promises).then(() => {
+				if(canRunCallback) return callback(eventObject);
+			});
+			if(canRunCallback) return callback(eventObject);
+		});
 	}
 
 	/**
