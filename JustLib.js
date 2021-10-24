@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-10-24T20:10:12+02:00
+ * Last Modified: 2021-10-24T20:11:50+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1395,6 +1395,10 @@ class Vector {
 
 	copy() {
 		return new Vector(this.x, this.y, this.z, this.angle);
+	}
+
+	distanceTo(vector) {
+		return Math.hypot(vector.x - this.x, vector.y - this.y, vector.z - this.z);
 	}
 
 	isEqual(vector) {
