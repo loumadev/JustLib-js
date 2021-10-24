@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-09-26T00:54:21+02:00
+ * Last Modified: 2021-10-24T20:10:12+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1384,15 +1384,19 @@ class Vector {
 		this.z = +z;
 		this.angle = +angle;
 	}
+
 	mult(n) {
 		this.x *= n;
 		this.y *= n;
 		this.z *= n;
+
 		return this;
 	}
+
 	copy() {
 		return new Vector(this.x, this.y, this.z, this.angle);
 	}
+
 	isEqual(vector) {
 		return (
 			this.x == vector.x &&
@@ -1401,6 +1405,7 @@ class Vector {
 			this.angle == vector.angle
 		);
 	}
+
 	toMatrix(size = 4) {
 		return new Matrix([
 			[this.x],
@@ -1409,9 +1414,11 @@ class Vector {
 			[1]
 		].slice(0, size));
 	}
+
 	toArray(size = 3) {
 		return [this.x, this.y, this.z, 1].slice(0, size);
 	}
+
 	toString() {
 		return `[${this.x}, ${this.y}, ${this.z}]`;
 	}
