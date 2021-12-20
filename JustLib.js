@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-10-24T20:11:50+02:00
+ * Last Modified: 2021-12-20T14:35:25+01:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1520,26 +1520,23 @@ class Color {
 
 	/**
 	 * Returns a string representing the color using specified format
-	 * Supported formats: RGB, RGBA, HEX, HEXA, HLS, HSLA
+	 * Supported formats: RGB, RGBA, HEX, HEXA
 	 * Default format: RGBA
-	 * @param {"RGB" | "RGBA" | "HEX" | "HEXA" | "HLS" | "HSLA"} format
+	 * @param {"RGB" | "RGBA" | "HEX" | "HEXA"} [format="RGBA"]
 	 * @returns {string} color
 	 */
 	toString(format = "RGBA") {
-		if(format == "HEX") {
-			//HEX
-			return `#${fixDigits(this.r.toString(16))}${fixDigits(this.g.toString(16))}${fixDigits(this.b.toString(16))}`;
-		} else if(format == "HEXA") {
-			//HEXA
-			return `#${fixDigits(this.r.toString(16))}${fixDigits(this.g.toString(16))}${fixDigits(this.b.toString(16))}${fixDigits(this.a.toString(16))}`;
-		} else if(format == "RGB") {
-			//RGB
-			return `rgb(${this.r},${this.g},${this.b})`;
-		} else if(format == "RGBA") {
-			//RGBA
-			return `rgba(${this.r},${this.g},${this.b},${this.a})`;
-		} else {
-			throw new TypeError(`Invalid color format '${format}'`);
+		switch(format.toLowerCase()) {
+			case "rgb":
+				return `rgb(${this.r}, ${this.g}, ${this.b})`;
+			case "rgba":
+				return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+			case "hex":
+				return `#${fixDigits(this.r.toString(16))}${fixDigits(this.g.toString(16))}${fixDigits(this.b.toString(16))}`;
+			case "hexa":
+				return `#${fixDigits(this.r.toString(16))}${fixDigits(this.g.toString(16))}${fixDigits(this.b.toString(16))}${fixDigits(this.a.toString(16))}`;
+			default:
+				throw new TypeError(`Invalid color format '${format}'`);
 		}
 	}
 
