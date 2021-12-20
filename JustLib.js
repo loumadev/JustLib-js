@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-12-20T14:35:25+01:00
+ * Last Modified: 2021-12-20T22:38:18+01:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -148,19 +148,26 @@ function getPath(elm) {
 
 // eslint-disable-next-line valid-jsdoc
 /**
- * @type {((selector: string, index?: number) => Element | Element[]) & ((root: HTMLElement, selector: string, index?: number) => Element | Element[])}
+ * @type {
+		((selector: string, index?: number) => Element | Element[]) &
+		((selector: string, index: true) => Element[]) &
+		((root: HTMLElement, selector: string, index?: number) => Element | Element[]) &
+		((root: HTMLElement, selector: string, index: true) => Element[])
+  }
  */
-let JL = function(root, selector, index = -1) {
-	var elm;
+var JL = function(root, selector, index) {
+	if(typeof index === "undefined") index = -1;
+
 	if(typeof root === "string") {
-		elm = document.querySelectorAll(root);
+		var elm = document.querySelectorAll(root);
 		index = selector;
 	} else {
 		if(!(root instanceof HTMLElement)) throw new TypeError(`'root' is not valid HTMLElement`);
 		if(typeof selector !== "string") throw new TypeError(`'selector' is not a HTML selector`);
 
-		elm = root.querySelectorAll(selector);
+		var elm = root.querySelectorAll(selector);
 	}
+	if(index === true) return [...elm];
 	if(!elm.length) return undefined;
 	else if(elm.length == 1) return elm[0];
 	else if(index > -1) return elm[index];
