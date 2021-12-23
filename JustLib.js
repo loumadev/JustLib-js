@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-12-20T22:38:18+01:00
+ * Last Modified: 2021-12-23T01:05:27+01:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -258,7 +258,7 @@ function getScrollTop() {
 	return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
 }
 
-function enterFullscreen(elm) {
+function enterFullscreen(elm = window.document.body) {
 	if(elm.requestFullscreen) {
 		elm.requestFullscreen();
 	} else if(elm.mozRequestFullScreen) {
