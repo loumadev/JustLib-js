@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2021-12-23T01:05:27+01:00
+ * Last Modified: 2022-01-01T15:56:52+01:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -2352,8 +2352,10 @@ try {
 				eventCallback = callback;
 				if(typeof callback !== "function") return eventCallback = null;
 
-				window.history.replaceState(null, document.title, window.location.pathname + "#backbutton");
-				window.history.pushState(null, document.title, window.location.pathname);
+				const href = window.location.href;
+
+				window.history.replaceState({href: href}, document.title, window.location.pathname + "#backbutton");
+				window.history.pushState(null, document.title, href);
 
 				return callback;
 			},
@@ -2379,7 +2381,7 @@ try {
 		});
 		window.addEventListener("popstate", function(e) {
 			if(window.location.hash == "#backbutton") {
-				window.history.replaceState(null, document.title, window.location.pathname);
+				window.history.replaceState(null, document.title, e.state.href);
 				if(eventCallback) eventCallback(e);
 				else window.history.go(-1);
 			}
