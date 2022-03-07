@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-01-01T15:56:52+01:00
+ * Last Modified: 2022-03-07T22:02:43+01:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1819,7 +1819,7 @@ class EventListener {
 
 	// eslint-disable-next-line valid-jsdoc
 	/**
-	 * Fires specific event
+	 * Fires a specific event
 	 * @param {string} type Event type
 	 * @param {Object<string, any> | EventListener.Event} [data={}] Custom event data
 	 * @param {(event: EventListener.Event) => any} [callback=null] Default action handler
@@ -1853,8 +1853,9 @@ class EventListener {
 		}
 
 		//Run all listener's callbacks
-		const promises = [];
 		return new Promise(async (resolve, reject) => {
+			const promises = [];
+
 			for(var listener of this.listeners) {
 				if(eventObject.isStopped) break;
 				if(listener.type != type) continue;
@@ -1864,17 +1865,13 @@ class EventListener {
 
 					if(eventObject.async && !eventObject.parallel) await listener.callback(eventObject);
 					else promises.push(listener.callback(eventObject));
-				} catch(e) {
-					console.error(e);
+				} catch(err) {
+					console.error(err);
 				}
 			}
-			resolve();
-		}).then(() => {
-			const canRunCallback = !eventObject.defaultPrevented && !!callback;
-			if(eventObject.async && eventObject.parallel) return Promise.all(promises).then(() => {
-				if(canRunCallback) return callback(eventObject);
-			});
-			if(canRunCallback) return callback(eventObject);
+
+			if(eventObject.async && eventObject.parallel) await Promise.all(promises);
+			if(!eventObject.defaultPrevented && typeof callback === "function") resolve(callback(eventObject));
 		});
 	}
 
@@ -1956,7 +1953,7 @@ class EventListenerStatic {
 
 	// eslint-disable-next-line valid-jsdoc
 	/**
-	 * Fires specific event
+	 * Fires a specific event
 	 * @param {string} type Event type
 	 * @param {Object<string, any> | EventListener.Event} [data={}] Custom event data
 	 * @param {(event: EventListener.Event) => any} [callback=null] Default action handler
@@ -1985,8 +1982,9 @@ class EventListenerStatic {
 		}
 
 		//Run all listener's callbacks
-		const promises = [];
 		return new Promise(async (resolve, reject) => {
+			const promises = [];
+
 			for(var listener of this.listeners) {
 				if(eventObject.isStopped) break;
 				if(listener.type != type) continue;
@@ -1996,17 +1994,13 @@ class EventListenerStatic {
 
 					if(eventObject.async && !eventObject.parallel) await listener.callback(eventObject);
 					else promises.push(listener.callback(eventObject));
-				} catch(e) {
-					console.error(e);
+				} catch(err) {
+					console.error(err);
 				}
 			}
-			resolve();
-		}).then(() => {
-			const canRunCallback = !eventObject.defaultPrevented && !!callback;
-			if(eventObject.async && eventObject.parallel) return Promise.all(promises).then(() => {
-				if(canRunCallback) return callback(eventObject);
-			});
-			if(canRunCallback) return callback(eventObject);
+
+			if(eventObject.async && eventObject.parallel) await Promise.all(promises);
+			if(!eventObject.defaultPrevented && typeof callback === "function") resolve(callback(eventObject));
 		});
 	}
 
