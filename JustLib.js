@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-03-07T22:02:43+01:00
+ * Last Modified: 2022-03-07T22:15:51+01:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1872,6 +1872,7 @@ class EventListener {
 
 			if(eventObject.async && eventObject.parallel) await Promise.all(promises);
 			if(!eventObject.defaultPrevented && typeof callback === "function") resolve(callback(eventObject));
+			else resolve(undefined);
 		});
 	}
 
@@ -2001,6 +2002,7 @@ class EventListenerStatic {
 
 			if(eventObject.async && eventObject.parallel) await Promise.all(promises);
 			if(!eventObject.defaultPrevented && typeof callback === "function") resolve(callback(eventObject));
+			else resolve(undefined);
 		});
 	}
 
