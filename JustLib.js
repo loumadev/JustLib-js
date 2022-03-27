@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-03-07T22:15:51+01:00
+ * Last Modified: 2022-03-27T21:38:17+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1390,6 +1390,22 @@ class Vector {
 		this.y = +y;
 		this.z = +z;
 		this.angle = +angle;
+	}
+
+	add(vector) {
+		this.x += vector.x;
+		this.y += vector.y;
+		this.z += vector.z;
+
+		return this;
+	}
+
+	sub(vector) {
+		this.x -= vector.x;
+		this.y -= vector.y;
+		this.z -= vector.z;
+
+		return this;
 	}
 
 	mult(n) {
