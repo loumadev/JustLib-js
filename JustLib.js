@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-03-28T23:13:27+02:00
+ * Last Modified: 2022-03-28T23:14:23+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
