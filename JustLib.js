@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-05-11T20:49:09+02:00
+ * Last Modified: 2022-05-15T16:30:38+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1510,6 +1510,15 @@ class Color {
 			this.b = typeof blue === "undefined" ? +red : +blue;
 			this.a = +alpha;
 		}
+	}
+
+	/**
+	 * Calculates the luminance of the color.
+	 * @return {number} Normalized luminance (in range 0 - 1).
+	 * @memberof Color
+	 */
+	getLuminance() {
+		return 0.2126 * this.r / 255 + 0.7152 * this.g / 255 + 0.0722 * this.b / 255;
 	}
 
 	// eslint-disable-next-line valid-jsdoc
