@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-05-15T16:30:38+02:00
+ * Last Modified: 2022-05-19T23:08:31+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -2154,6 +2154,25 @@ class RandomGenerator {
 	 */
 	choice(array) {
 		return array[this.nextInt(array.length)];
+	}
+
+	/**
+	 * Generates a random number fitting a Gaussian distribution
+	 * @param {number} min Lower bound of distribution
+	 * @param {number} max Upper bound of distribution
+	 * @param {number} [skew=1] Distribution skew
+	 * @return {number} Random number in gaussian distribution
+	 * @memberof RandomGenerator
+	 */
+	gaussian(min, max, skew = 1) {
+		let u = 0, v = 0;
+		while(u === 0) u = this.next();
+		while(v === 0) v = this.next();
+
+		let num = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) / 10 + 0.5;
+		if(num > 1 || num < 0) num = this.gaussian(min, max, skew);
+
+		return Math.pow(num, skew) * (max - min) + min;
 	}
 }
 
