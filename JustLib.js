@@ -2144,6 +2144,17 @@ class RandomGenerator {
 
 		return array;
 	}
+
+	/**
+	 * Picks random element from array
+	 * @template T
+	 * @param {T[]} array Input array
+	 * @returns {T} Random element from array
+	 * @memberof RandomGenerator
+	 */
+	choice(array) {
+		return array[this.nextInt(array.length)];
+	}
 }
 
 /**
