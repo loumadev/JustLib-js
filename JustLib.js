@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-05-19T23:08:31+02:00
+ * Last Modified: 2022-05-25T18:16:38+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -2337,6 +2337,7 @@ try {
 		 *
 		 * Calls the specified callback function for all the key-value pairs in a object. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
 		 *
+		 * @deprecated Use Object.reduce(object, callbackfn, initialValue) instead
 		 * @param {(previousValue: any, currentValue: {key: string, value: any}, currentIndex: number, object: Object) => any} callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each key-value pair in the object.
 		 * @param {any} initialValue  If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of value of the first key-value pair in the object.
 		 * @return {any} Accumulated result.
@@ -2377,6 +2378,57 @@ try {
 			return previousValue;
 		},
 		writable: true,
+		enumerable: false
+	});
+} catch(e) { }
+
+try {
+	Object.defineProperty(Object, "reduce", {
+		// eslint-disable-next-line valid-jsdoc
+		/**
+		 * Equivalent of Array.prototype.reduce for Object keys and values
+		 *
+		 * Calls the specified callback function for all the key-value pairs in a object. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+		 *
+		 * @param {Object} o Target object to reduce.
+		 * @param {(previousValue: any, currentValue: [key: string, value: any], currentIndex: number, object: Object) => any} callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each key-value pair in the object.
+		 * @param {any} [initialValue]  If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of value of the first key-value pair in the object.
+		 * @return {any} Accumulated result.
+		 * @example
+		 * //Sum of all values in object
+		 * const object = {apples: 14, oranges: 8, bananas: 23};	//Our object
+		 * Object.reduce(object, (prev, [key, value]) => prev + value);	//45
+		 * @example
+		 * //Parse object as URL query string
+		 * const object = {apples: 14, oranges: 8, bananas: 23};  //Our object
+		 * Object.reduce(object, (prev, [key, value], i) => {   //We can use object destruction for key-value pair
+		 * 	return prev + `${i ? "&" : ""}${key}=${value}`;	//If the call is first, don't put "?" at start (we put there "&")
+		 * }, "?");	//Start with "?"
+		 */
+		value: function(o, callbackfn, initialValue = Object.values(o)[0]) {
+			const keys = Object.keys(o);
+			let previousValue = initialValue;
+
+			if(typeof callbackfn !== "function")
+				throw new TypeError(callbackfn + " is not a function");
+			if(typeof initialValue === "undefined" && !keys.length)
+				throw new TypeError("Reduce of empty object with no initial value");
+
+			for(let currentIndex = +(initialValue == Object.values(o)[0]); currentIndex < keys.length; currentIndex++) {
+				const key = keys[currentIndex];
+				const value = o[key];
+
+				previousValue = callbackfn(
+					previousValue,
+					[key, value],
+					currentIndex,
+					o
+				);
+			}
+
+			return previousValue;
+		},
+		writable: true
 	});
 } catch(e) { }
 
