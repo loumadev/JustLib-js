@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-05-25T18:16:38+02:00
+ * Last Modified: 2022-05-25T18:40:21+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -149,9 +149,11 @@ function getPath(elm) {
 // eslint-disable-next-line valid-jsdoc
 /**
  * @type {
-		((selector: string, index?: number) => Element | Element[]) &
+		((selector: string) => Element | Element[]) &
+		((selector: string, index: number) => Element) &
 		((selector: string, index: true) => Element[]) &
-		((root: HTMLElement, selector: string, index?: number) => Element | Element[]) &
+		((root: HTMLElement, selector: string) => Element | Element[]) &
+		((root: HTMLElement, selector: string, index: number) => Element) &
 		((root: HTMLElement, selector: string, index: true) => Element[])
   }
  */
@@ -261,15 +263,15 @@ function getScrollTop() {
 function enterFullscreen(elm = window.document.body) {
 	if(elm.requestFullscreen) {
 		elm.requestFullscreen();
-	} else if(elm.mozRequestFullScreen) {
+	} else if(elm["mozRequestFullScreen"]) {
 		/* Firefox */
-		elm.mozRequestFullScreen();
-	} else if(elm.webkitRequestFullscreen) {
+		elm["mozRequestFullScreen"]();
+	} else if(elm["webkitRequestFullscreen"]) {
 		/* Chrome, Safari & Opera */
-		elm.webkitRequestFullscreen();
-	} else if(elm.msRequestFullscreen) {
+		elm["webkitRequestFullscreen"]();
+	} else if(elm["msRequestFullscreen"]) {
 		/* IE/Edge */
-		elm.msRequestFullscreen();
+		elm["msRequestFullscreen"]();
 	} else return false;
 }
 
@@ -282,16 +284,16 @@ function exitFullscreen() {
 	if(document.exitFullscreen) {
 		document.exitFullscreen();
 	} else if("mozCancelFullScreen" in document) {
-		document.mozCancelFullScreen();
+		document["mozCancelFullScreen"]();
 	} else if("webkitExitFullscreen" in document) {
-		document.webkitExitFullscreen();
+		document["webkitExitFullscreen"]();
 	} else if("msExitFullscreen" in document) {
-		document.msExitFullscreen();
+		document["msExitFullscreen"]();
 	} else return false;
 }
 
 function isTouchscreen() {
-	if(("ontouchstart" in window) || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0 || ("DocumentTouch" in window && document instanceof DocumentTouch)) return true;
+	if(("ontouchstart" in window) || navigator.maxTouchPoints > 0 || navigator["msMaxTouchPoints"] > 0 || ("DocumentTouch" in window && document instanceof DocumentTouch)) return true;
 	else return false;
 }
 
@@ -801,7 +803,7 @@ function copyToClipboard(text) {
 	node.style.left = "0";
 	node.style.position = "fixed";
 
-	JL("body").appendChild(node);
+	JL("body", 0).appendChild(node);
 	node.focus();
 	node.select();
 
@@ -2303,10 +2305,10 @@ if(typeof document !== "undefined") {
 		// Opera 12.10 and Firefox 18 and later support
 		HIDDEN = "hidden";
 		VISIBILITY_CHANGE = "visibilitychange";
-	} else if(typeof document.msHidden !== "undefined") {
+	} else if(typeof document["msHidden"] !== "undefined") {
 		HIDDEN = "msHidden";
 		VISIBILITY_CHANGE = "msvisibilitychange";
-	} else if(typeof document.webkitHidden !== "undefined") {
+	} else if(typeof document["webkitHidden"] !== "undefined") {
 		HIDDEN = "webkitHidden";
 		VISIBILITY_CHANGE = "webkitvisibilitychange";
 	}
@@ -2317,7 +2319,7 @@ if(typeof document !== "undefined") {
  * Remove diacritics from the string
  * @returns {string} New string without diacritics
  */
-String.prototype.removeAccents = function() {
+String.prototype["removeAccents"] = function() {
 	return this.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 };
 
@@ -2325,7 +2327,7 @@ String.prototype.removeAccents = function() {
  * Capitalize the string
  * @returns {string} New string with first letter capital
  */
-String.prototype.capitalize = function() {
+String.prototype["capitalize"] = function() {
 	return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
@@ -2478,11 +2480,11 @@ try {
 			set: function(callback) {
 				const func = e => {
 					callback(e);
-					window.onbackbuttononce = func;
+					window["onbackbuttononce"] = func;
 				};
 
-				window.onbackbuttononce = func;
-				window.onbackbuttononce;
+				window["onbackbuttononce"] = func;
+				window["onbackbuttononce"];
 
 				return callback;
 			},
