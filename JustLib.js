@@ -2348,9 +2348,9 @@ try {
 		 * //Parse object as URL query string
 		 * var object = {apples: 14, oranges: 8, bananas: 23};	//Our object
 		 * object.reduce((prev, {key, value}, i) => {	//We can use object deconstruction for key-value pair
-		 * 	var curr = `${i ? "?" : ""}${key}=${value}`;	//If the call is first, don't put "?" at start (we put there "&")
+		 * 	var curr = `${i ? "&" : ""}${key}=${value}`;	//If the call is first, don't put "&" at start (we put there "?")
 		 * 	return prev + curr;	//Return new string
-		 * }, "&");	//Start with "&"
+		 * }, "?");	//Start with "?"
 		 */
 		value: function(callbackfn, initialValue = Object.values(this)[0]) {
 			var keys = Object.keys(this);
