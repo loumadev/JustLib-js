@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-05-25T18:40:21+02:00
+ * Last Modified: 2022-07-30T18:09:46+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1386,14 +1386,53 @@ class Matrix {
 	}
 }
 
+/**
+ * A class to describe a Vector up to 3 dimensions.
+ *
+ * @class Vector
+ */
 class Vector {
+	/**
+	 * Creates an instance of Vector.
+	 * @param {number} [x=0] X component of the vector.
+	 * @param {number} [y=0] Y component of the vector.
+	 * @param {number} [z=0] Z component of the vector.
+	 * @param {number} [angle=0] (Deprecated) Additional component of vector. (Has nothing to do with the actual angle of the vector.)
+	 * @memberof Vector
+	 */
 	constructor(x = 0, y = 0, z = 0, angle = 0) {
-		this.x = +x;
-		this.y = +y;
-		this.z = +z;
-		this.angle = +angle;
+		/**
+		 * X component of the vector.
+		 * @type {number}
+		 */
+		this.x = +x || 0;
+
+		/**
+		 * Y component of the vector.
+		 * @type {number}
+		 */
+		this.y = +y || 0;
+
+		/**
+		 * Z component of the vector.
+		 * @type {number}
+		 */
+		this.z = +z || 0;
+
+		/**
+		 * Additional component of vector. (Has nothing to do with the actual angle of the vector.)
+		 * @deprecated This property should not be used because of it misleading name.
+		 * @type {number}
+		 */
+		this.angle = +angle || 0;
 	}
 
+	/**
+	 * Adds Vector to current Vector.
+	 * @param {Vector} vector
+	 * @return {this} 
+	 * @memberof Vector
+	 */
 	add(vector) {
 		this.x += vector.x;
 		this.y += vector.y;
@@ -1402,6 +1441,12 @@ class Vector {
 		return this;
 	}
 
+	/**
+	 * Substracts Vector from current Vector.
+	 * @param {Vector} vector
+	 * @return {this} 
+	 * @memberof Vector
+	 */
 	sub(vector) {
 		this.x -= vector.x;
 		this.y -= vector.y;
@@ -1410,6 +1455,12 @@ class Vector {
 		return this;
 	}
 
+	/**
+	 * Multiplies current Vector by scalar.
+	 * @param {number} n
+	 * @return {this} 
+	 * @memberof Vector
+	 */
 	mult(n) {
 		this.x *= n;
 		this.y *= n;
@@ -1418,6 +1469,25 @@ class Vector {
 		return this;
 	}
 
+	/**
+	 * Divides current Vector by scalar.
+	 * @param {number} n
+	 * @return {this} 
+	 * @memberof Vector
+	 */
+	div(n) {
+		this.x /= n;
+		this.y /= n;
+		this.z /= n;
+
+		return this;
+	}
+
+	/**
+	 * Inverts current Vector.
+	 * @return {this} 
+	 * @memberof Vector
+	 */
 	invert() {
 		this.x = -this.x;
 		this.y = -this.y;
@@ -1426,23 +1496,104 @@ class Vector {
 		return this;
 	}
 
+	/**
+	 * Calculates dot product of current Vector and given Vector.
+	 * @param {Vector} vector
+	 * @return {number} 
+	 * @memberof Vector
+	 */
+	dot(vector) {
+		return this.x * vector.x + this.y * vector.y + this.z * vector.z;
+	}
+
+	/**
+	 * Calculates a Vector composed of the cross product between current Vector and given Vector.
+	 * @param {Vector} vector
+	 * @return {Vector} 
+	 * @memberof Vector
+	 */
+	cross(vector) {
+		return new Vector(
+			this.y * vector.z - this.z * vector.y,
+			this.z * vector.x - this.x * vector.z,
+			this.x * vector.y - this.y * vector.x
+		);
+	}
+
+	/**
+	 * Calculates the magnitude (length) of current Vector.
+	 * @return {number} 
+	 * @memberof Vector
+	 */
+	mag() {
+		return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+	}
+
+	/**
+	 * Normalizes current Vector.
+	 * @return {this} 
+	 * @memberof Vector
+	 */
+	normalize() {
+		const m = this.mag();
+
+		if(m != 0 && m != 1) {
+			this.x /= m;
+			this.y /= m;
+			this.z /= m;
+		}
+
+		return this;
+	}
+
+	/**
+	 * Sets the magnitude of current Vector.
+	 * @param {number} length
+	 * @return {this} 
+	 * @memberof Vector
+	 */
+	setMag(length) {
+		this.normalize();
+		this.mult(length);
+
+		return this;
+	}
+
+	/**
+	 * Creates a new Vector instance initialized with the same components as current Vector.
+	 * @return {Vector} 
+	 * @memberof Vector
+	 */
 	copy() {
 		return new Vector(this.x, this.y, this.z, this.angle);
 	}
 
+	/**
+	 * Calculates the distance from current vector to a given vector.
+	 * @param {Vector} vector
+	 * @return {number} 
+	 * @memberof Vector
+	 */
 	distanceTo(vector) {
 		return Math.hypot(vector.x - this.x, vector.y - this.y, vector.z - this.z);
 	}
 
+	/**
+	 * Checks if the components of the current Vector are equal to components of another Vector.
+	 * @param {Vector} vector
+	 * @return {boolean} 
+	 * @memberof Vector
+	 */
 	isEqual(vector) {
-		return (
-			this.x == vector.x &&
-			this.y == vector.y &&
-			this.z == vector.z &&
-			this.angle == vector.angle
-		);
+		return this.x == vector.x && this.y == vector.y && this.z == vector.z;
 	}
 
+	/**
+	 * Converts current Vector into {size}X1 matrix
+	 * @param {number} [size=4] Number of components to include in the matrix. (Fourth component is always 1.)
+	 * @return {Matrix} 
+	 * @memberof Vector
+	 */
 	toMatrix(size = 4) {
 		return new Matrix([
 			[this.x],
@@ -1452,12 +1603,70 @@ class Vector {
 		].slice(0, size));
 	}
 
+	/**
+	 * Converts current Vector into 1D array.
+	 * @param {number} [size=3] Number of components to include in the array. (Fourth component is always 1.)
+	 * @return {Array<number>} 
+	 * @memberof Vector
+	 */
 	toArray(size = 3) {
 		return [this.x, this.y, this.z, 1].slice(0, size);
 	}
 
+	/**
+	 * Converts current Vector into string representation.
+	 * @return {string} String represented as "[x, y, z]".
+	 * @memberof Vector
+	 */
 	toString() {
 		return `[${this.x}, ${this.y}, ${this.z}]`;
+	}
+
+	/**
+	 * Creates a new Vector instance from given angle(s).
+	 * @static
+	 * @param {number} theta
+	 * @param {number} [phi=0]
+	 * @return {Vector}
+	 * @memberof Vector
+	 */
+	static fromAngle(theta, phi = 0) {
+		return new Vector(
+			Math.cos(theta) * Math.cos(phi),
+			Math.sin(theta) * Math.cos(phi),
+			Math.sin(phi)
+		);
+	}
+
+	/**
+	 * Creates a new Vector instance from given array.
+	 * @static
+	 * @param {Array<number>} array
+	 * @return {Vector} 
+	 * @memberof Vector
+	 */
+	static fromArray(array) {
+		return new Vector(array[0] || 0, array[1] || 0, array[2] || 0);
+	}
+
+	/**
+	 * Creates a random vector.
+	 * @static
+	 * @param {boolean} [unit=true] If `true`, vector will be normalized, otherwise all components will be random numbers between 0 and 1.
+	 * @param {RandomGenerator} [rng=null] Random generator to use. If not provided, a JavaScript built-in random generator will be used.
+	 * @return {Vector} 
+	 * @memberof Vector
+	 */
+	static random(unit = true, rng = null) {
+		if(unit) {
+			return rng ?
+				Vector.fromAngle(rng.next() * TWO_PI, rng.next() * TWO_PI) :
+				Vector.fromAngle(Math.random() * TWO_PI, Math.random() * TWO_PI);
+		} else {
+			return rng ?
+				new Vector(rng.next(), rng.next(), rng.next()) :
+				new Vector(Math.random(), Math.random(), Math.random());
+		}
 	}
 }
 
