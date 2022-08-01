@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-07-30T18:09:46+02:00
+ * Last Modified: 2022-08-02T01:21:50+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -2066,10 +2066,11 @@ class EventListener {
 	 * Fires a specific event
 	 * @param {string} type Event type
 	 * @param {Object<string, any> | EventListener.Event} [data={}] Custom event data
-	 * @param {(event: EventListener.Event) => any} [callback=null] Default action handler
-	 * @returns {any | undefined | Promise<any | undefined>} Returned value of the callback function
+	 * @param {(event: EventListener.Event) => T} [callback=null] Default action handler
+	 * @returns {Promise<T | undefined>} Returned value of the callback function
+	 * @template T
 	 */
-	dispatchEvent(type, data = {}, callback = null) {
+	async dispatchEvent(type, data = {}, callback = null) {
 		//Setup Event Object
 		const defaultData = {
 			type: type,
@@ -2097,27 +2098,21 @@ class EventListener {
 		}
 
 		//Run all listener's callbacks
-		return new Promise(async (resolve, reject) => {
-			const promises = [];
+		const promises = [];
 
-			for(var listener of this.listeners) {
-				if(eventObject.isStopped) break;
-				if(listener.type != type) continue;
+		for(var listener of this.listeners) {
+			if(eventObject.isStopped) break;
+			if(listener.type != type) continue;
 
-				try {
-					eventObject.hasListener = true;
+			eventObject.hasListener = true;
 
-					if(eventObject.async && !eventObject.parallel) await listener.callback(eventObject);
-					else promises.push(listener.callback(eventObject));
-				} catch(err) {
-					console.error(err);
-				}
-			}
+			if(eventObject.async && !eventObject.parallel) await listener.callback(eventObject);
+			else promises.push(listener.callback(eventObject));
+		}
 
-			if(eventObject.async && eventObject.parallel) await Promise.all(promises);
-			if(!eventObject.defaultPrevented && typeof callback === "function") resolve(callback(eventObject));
-			else resolve(undefined);
-		});
+		if(eventObject.async && eventObject.parallel) await Promise.all(promises);
+		if(!eventObject.defaultPrevented && typeof callback === "function") return callback(eventObject);
+		else return undefined;
 	}
 
 	/**
@@ -2201,10 +2196,11 @@ class EventListenerStatic {
 	 * Fires a specific event
 	 * @param {string} type Event type
 	 * @param {Object<string, any> | EventListener.Event} [data={}] Custom event data
-	 * @param {(event: EventListener.Event) => any} [callback=null] Default action handler
-	 * @returns {any | undefined | Promise<any | undefined>} Returned value of the callback function
+	 * @param {(event: EventListener.Event) => T} [callback=null] Default action handler
+	 * @returns {Promise<T | undefined>} Returned value of the callback function
+	 * @template T
 	 */
-	static dispatchEvent(type, data = {}, callback = null) {
+	static async dispatchEvent(type, data = {}, callback = null) {
 		//Setup Event Object
 		const defaultData = {
 			type: type,
@@ -2217,37 +2213,36 @@ class EventListenerStatic {
 
 		//Add data to an object
 		if(data instanceof EventListener.Event) {
+			//Assign Event Object
 			eventObject = data;
+			eventObject.type = type;
+
+			//Add default data
 			for(const prop in defaultData) {
 				if(prop in eventObject) continue;
 				eventObject[prop] = defaultData[prop];
 			}
 		} else {
+			//Create new Event Object
 			eventObject = new EventListener.Event(defaultData, data);
 		}
 
 		//Run all listener's callbacks
-		return new Promise(async (resolve, reject) => {
-			const promises = [];
+		const promises = [];
 
-			for(var listener of this.listeners) {
-				if(eventObject.isStopped) break;
-				if(listener.type != type) continue;
+		for(var listener of this.listeners) {
+			if(eventObject.isStopped) break;
+			if(listener.type != type) continue;
 
-				try {
-					eventObject.hasListener = true;
+			eventObject.hasListener = true;
 
-					if(eventObject.async && !eventObject.parallel) await listener.callback(eventObject);
-					else promises.push(listener.callback(eventObject));
-				} catch(err) {
-					console.error(err);
-				}
-			}
+			if(eventObject.async && !eventObject.parallel) await listener.callback(eventObject);
+			else promises.push(listener.callback(eventObject));
+		}
 
-			if(eventObject.async && eventObject.parallel) await Promise.all(promises);
-			if(!eventObject.defaultPrevented && typeof callback === "function") resolve(callback(eventObject));
-			else resolve(undefined);
-		});
+		if(eventObject.async && eventObject.parallel) await Promise.all(promises);
+		if(!eventObject.defaultPrevented && typeof callback === "function") return callback(eventObject);
+		else return undefined;
 	}
 
 	/**
