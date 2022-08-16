@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-08-02T01:21:50+02:00
+ * Last Modified: 2022-08-16T02:37:06+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -686,8 +686,8 @@ function timeout(time) {
 /**
  * Create iterable key-value pairs.
  * @template T
- * @param {T[] | T} iterable Iterable Object, Array or any other value.
- * @returns {T !extends { [key: string]: any } ? [number, T][] : [number, keyof T, T[keyof T]][]} Iterator
+ * @param {T} iterable Iterable Object, Array or any other value.
+ * @returns {T extends Array | String ? [number, T[number]][] : [number, keyof T, T[keyof T]][]} Iterator
  * @example
  * iterate([4, 5, 6]);           // [[0, 4], [1, 5], [2, 6]]
  * iterate([]);                  // []
@@ -713,7 +713,7 @@ function iterate(iterable) {
  * Zips multiple iterators
  * @template A, B, C, D, E
  * @param {[A[]?, B[]?, C[]?, D[]?, E[]?]} iterables
- * @returns {[A?, B?, C?, D?, E?][]} Iterator
+ * @returns {[A[number], B[number], C[number], D[number], E[number]][]} Iterator
  * @example
  * zip(["John", "Charles", "Mike"], ["Jenny", "Christy", "Monica"]); //[["John", "Jenny"], ["Charles", "Christy"], ["Mike", "Monica"]]
  * zip([1, "a"], [2, "b"], [3]) //[1, 2, 3] -> "c" is missing
