@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-08-16T02:37:06+02:00
+ * Last Modified: 2022-08-29T21:53:17+02:00
  * 
  * Copyright (c) 2019 - 2021 Jaroslav Louma
  */
@@ -1604,6 +1604,15 @@ class Vector {
 	}
 
 	/**
+	 * Converts current Vector into a new `Dimensions` object.
+	 * @return {Dimensions} 
+	 * @memberof Vector
+	 */
+	toDimensions() {
+		return new Dimensions(this.x, this.y, this.z);
+	}
+
+	/**
 	 * Converts current Vector into 1D array.
 	 * @param {number} [size=3] Number of components to include in the array. (Fourth component is always 1.)
 	 * @return {Array<number>} 
@@ -1673,14 +1682,47 @@ class Vector {
 
 class Dimensions {
 	constructor(width = 0, height = 0, depth = 0, radius = 0) {
-		this.w = width;
-		this.h = height;
-		this.d = depth;
-		this.r = radius;
+		this.w = width || 0;
+		this.h = height || 0;
+		this.d = depth || 0;
+		this.r = radius || 0;
 	}
 
+	/**
+	 * Creates a new Dimensions instance initialized with the same dimension values as current Dimensions instance.
+	 * @return {Dimensions} 
+	 * @memberof Dimensions
+	 */
 	copy() {
 		return new Dimensions(this.w, this.h, this.d, this.r);
+	}
+
+	/**
+	 * Converts current Dimensions object into a new `Vector` object.
+	 * @return {Vector} 
+	 * @memberof Dimensions
+	 */
+	toVector() {
+		return new Vector(this.w, this.h, this.d);
+	}
+
+	/**
+	 * Converts current Dimensions object into 1D array.
+	 * @param {number} [size=3] Number of dimensions to include in the array. (Fourth component is always 1.)
+	 * @return {Array<number>} 
+	 * @memberof Dimensions
+	 */
+	toArray(size = 3) {
+		return [this.w, this.h, this.d, 1].slice(0, size);
+	}
+
+	/**
+	 * Converts current Dimensions object into string representation.
+	 * @return {string} String represented as "[w, h, d]".
+	 * @memberof Dimensions
+	 */
+	toString() {
+		return `[${this.w}, ${this.h}, ${this.d}]`;
 	}
 }
 
