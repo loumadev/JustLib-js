@@ -1484,6 +1484,34 @@ class Vector {
 	}
 
 	/**
+	 * Sets current Vector to minimum of itself and given Vector.
+	 * @param {Vector} vector
+	 * @return {this} 
+	 * @memberof Vector
+	 */
+	min(vector) {
+		this.x = Math.min(this.x, vector.x);
+		this.y = Math.min(this.y, vector.y);
+		this.z = Math.min(this.z, vector.z);
+
+		return this;
+	}
+
+	/**
+	 * Sets current Vector to maximum of itself and given Vector.
+	 * @param {Vector} vector
+	 * @return {this} 
+	 * @memberof Vector
+	 */
+	max(vector) {
+		this.x = Math.max(this.x, vector.x);
+		this.y = Math.max(this.y, vector.y);
+		this.z = Math.max(this.z, vector.z);
+
+		return this;
+	}
+
+	/**
 	 * Inverts current Vector.
 	 * @return {this} 
 	 * @memberof Vector
@@ -1666,7 +1694,7 @@ class Vector {
 	 * @return {Vector} 
 	 * @memberof Vector
 	 */
-	static random(unit = true, rng = null) {
+	static random(unit = true, rng = undefined) {
 		if(unit) {
 			return rng ?
 				Vector.fromAngle(rng.next() * TWO_PI, rng.next() * TWO_PI) :
