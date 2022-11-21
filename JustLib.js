@@ -1512,6 +1512,21 @@ class Vector {
 	}
 
 	/**
+	 * Clamps current Vector to given range.
+	 * @param {Vector} minVector
+	 * @param {Vector} maxVector
+	 * @return {this}
+	 * @memberof Vector
+	 */
+	clamp(minVector, maxVector) {
+		this.x = Math.min(Math.max(this.x, minVector.x), maxVector.x);
+		this.y = Math.min(Math.max(this.y, minVector.y), maxVector.y);
+		this.z = Math.min(Math.max(this.z, minVector.z), maxVector.z);
+
+		return this;
+	}
+
+	/**
 	 * Inverts current Vector.
 	 * @return {this} 
 	 * @memberof Vector
