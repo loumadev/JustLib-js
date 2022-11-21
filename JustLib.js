@@ -1541,11 +1541,11 @@ class Vector {
 
 	/**
 	 * Calculates dot product of current Vector and given Vector.
-	 * @param {Vector} vector
+	 * @param {Vector} [vector=this] Vector to calculate dot product with. If not given, current Vector is used, calculating the squared length of the Vector.
 	 * @return {number} 
 	 * @memberof Vector
 	 */
-	dot(vector) {
+	dot(vector = this) {
 		return this.x * vector.x + this.y * vector.y + this.z * vector.z;
 	}
 
@@ -1569,7 +1569,7 @@ class Vector {
 	 * @memberof Vector
 	 */
 	mag() {
-		return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+		return Math.hypot(this.x, this.y, this.z);
 	}
 
 	/**
