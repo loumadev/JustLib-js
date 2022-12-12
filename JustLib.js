@@ -1331,6 +1331,95 @@ class Matrix {
 	}
 
 	/**
+	 * Inverts the Matrix. New Matrix is returned.
+	 * @return {*} 
+	 * @memberof Matrix
+	 */
+	inverse() {
+		if(this.rows != this.cols) return undefined;
+
+		//First create an identity matrix of the same size
+		const identity = Matrix.identity(this.rows);
+
+		//Create a copy of the matrix
+		const mat = this.copy();
+
+		//Loop over the matrix
+		for(let i = 0; i < this.rows; i++) {
+			//Find the pivot element
+			let pivot = mat.matrix[i][i];
+
+			//If pivot is zero, swap the row with a row below it
+			if(pivot == 0) {
+				for(let j = i + 1; j < this.rows; j++) {
+					if(mat.matrix[j][i] != 0) {
+						mat.swapRow(i, j);
+						identity.swapRow(i, j);
+						break;
+					}
+				}
+			}
+
+			//If pivot is still zero, then the matrix is singular
+			if(pivot == 0) {
+				throw new Error("Cannot inverse singular matrix!");
+			}
+
+			//Normalize the pivot row
+			for(let j = 0; j < this.cols; j++) {
+				mat.matrix[i][j] /= pivot;
+				identity.matrix[i][j] /= pivot;
+			}
+
+			//Loop over the rows
+			for(let j = 0; j < this.rows; j++) {
+				//If the row is the pivot row, skip it
+				if(j == i) continue;
+
+				//If the row is not the pivot row, subtract the pivot row
+				const factor = mat.matrix[j][i];
+				for(let k = 0; k < this.cols; k++) {
+					mat.matrix[j][k] -= factor * mat.matrix[i][k];
+					identity.matrix[j][k] -= factor * identity.matrix[i][k];
+				}
+			}
+		}
+
+		return identity;
+	}
+
+	/**
+	 * Swaps two rows of the Matrix.
+	 * @param {number} i
+	 * @param {number} j
+	 * @memberof Matrix
+	 */
+	swapRow(i, j) {
+		if(i < 0 || i >= this.rows || j < 0 || j >= this.rows) throw new Error("Index out of bounds");
+
+		const temp = this.matrix[i];
+		this.matrix[i] = this.matrix[j];
+		this.matrix[j] = temp;
+	}
+
+	/**
+	 * Swaps two columns of the Matrix.
+	 * @param {number} i
+	 * @param {number} j
+	 * @memberof Matrix
+	 */
+	swapCol(i, j) {
+		if(i < 0 || i >= this.cols || j < 0 || j >= this.cols) throw new Error("Index out of bounds");
+
+		for(var k = 0; k < this.rows; k++) {
+			const temp = this.matrix[k][i];
+			this.matrix[k][i] = this.matrix[k][j];
+			this.matrix[k][j] = temp;
+		}
+	}
+
+
+	/**
 	 * Sets each value to random number in given range.
 	 * @param {number} from Range from.
 	 * @param {number} to Range to.
@@ -1383,6 +1472,25 @@ class Matrix {
 	 */
 	print() {
 		console.table(this.matrix);
+	}
+
+	/**
+	 * Creates a new identity Matrix of given size.
+	 * @static
+	 * @param {number} size
+	 * @return {Matrix} 
+	 * @memberof Matrix
+	 */
+	static identity(size) {
+		const mat = new Matrix(size, size);
+
+		for(let i = 0; i < size; i++) {
+			for(let j = 0; j < size; j++) {
+				mat.matrix[i][j] = i == j ? 1 : 0;
+			}
+		}
+
+		return mat;
 	}
 }
 
