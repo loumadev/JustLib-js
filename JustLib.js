@@ -4,9 +4,9 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-08-29T21:53:17+02:00
+ * Last Modified: 2022-12-12T16:41:28+01:00
  * 
- * Copyright (c) 2019 - 2021 Jaroslav Louma
+ * Copyright (c) 2019 - 2023 Jaroslav Louma
  */
 
 // @ts-check
@@ -111,7 +111,7 @@ function hasClass(elm, cls) {
  * Toggles Class of HTML Element.
  * @param {HTMLElement} elm HTML Element
  * @param {string} cls Class
- * @param {boolean} state set/reset
+ * @param {boolean} [state] set/reset
  * @returns {boolean}
  */
 function toggleClass(elm, cls, state = undefined) {
@@ -224,8 +224,11 @@ function getElementDimensions(elm) {
 }
 
 function cloneElement(node, style = true) {
-	var clone = node.cloneNode(true);
-	if(style) clone.style.cssText = document.defaultView.getComputedStyle(node, "").cssText;
+	const clone = node.cloneNode(true);
+	if(style) {
+		if(!document.defaultView) return clone;
+		clone.style.cssText = document.defaultView.getComputedStyle(node, "").cssText;
+	}
 	return clone;
 }
 
@@ -625,7 +628,7 @@ function parseColor(color) {
 		color = hexa2rgba((color + "00").slice(0, 9));
 	}
 	var ch = color.split(",").map(elm => {
-		return +elm.match(/[0-9.]+/)[0];
+		return +(elm.match(/[0-9.]+/) || "")[0];
 	});
 	return new Color(ch[0], ch[1], ch[2], ch[3] || 1);
 }
@@ -857,7 +860,7 @@ const HIGHLIGHTER = {
  * Highlight input code as HTML
  * @param {string} str Input code
  * @param {HighlightOptions} options Highlighter options 
- * @param {(error: Error, originalString: string) => void} onerror Error event callback
+ * @param {(error: Error, originalString: string) => void} [onerror] Error event callback
  * @return {string} Highlighted input code
  */
 function Highlight(str, {
@@ -871,7 +874,7 @@ function Highlight(str, {
 	lineHeight = 18,
 	allowSelection = true,
 	debug = false
-} = {}, onerror = null) {
+} = {}, onerror = undefined) {
 	var Colors = {
 		/*"(\\w+)": "red",*/
 		/*"(\\/\\/.*?(?:\\\\n|\\n|$)|\\/\\*(?:.|\\n|\\r)*?\\*\\/)": "COMMENT",*/
@@ -1181,7 +1184,7 @@ class Matrix {
 	/**
 	 * Useful to store Matrix data. Class contains methods to make operations with another Matrices.
 	 * @param {number | Array<number[]>} matrix Array matrix or Number of rows.
-	 * @param {number} cols Number of columns.
+	 * @param {number} [cols] Number of columns.
 	 */
 	constructor(matrix /*rows*/, cols = undefined) {
 		if(typeof matrix === "object") {
@@ -1226,8 +1229,7 @@ class Matrix {
 
 		if(hadamard) {
 			if(this.rows != matrix.rows || this.cols != matrix.cols) {
-				console.warn("[JustLib] Columns and rows of matrices are not equal! (Hadamard Product)");
-				return undefined;
+				throw new Error("Columns and rows of matrices are not equal! (Hadamard Product)");
 			}
 			for(var i = 0; i < this.rows; i++) {
 				for(var j = 0; j < this.cols; j++) {
@@ -1238,8 +1240,7 @@ class Matrix {
 		}
 
 		if(isMat && this.cols != matrix.rows) {
-			console.warn("[JustLib] Columns and rows of matrices are not equal!");
-			return undefined;
+			throw new Error("Columns and rows of matrices are not equal!");
 		}
 
 		for(var i = 0; i < this.rows; i++) {
@@ -1252,11 +1253,34 @@ class Matrix {
 				} else if(typeof matrix === "number") {
 					sum = this.matrix[i][j] * matrix;
 				} else {
-					console.warn(`[JustLib] Invalid type of parameter "${typeof matrix}", only supported are Numbers and Matrices!`);
-					return undefined;
+					throw new Error(`Invalid type of parameter "${typeof matrix}", only supported are Numbers and Matrices!`);
 				}
 				mat.matrix[i][j] = sum;
 			}
+		}
+		return mat;
+	}
+
+	div(matrix) {
+		const mat = new Matrix(this.rows, this.cols);
+
+		if(matrix instanceof Matrix) {
+			if(this.rows != matrix.rows || this.cols != matrix.cols) {
+				throw new Error("Columns and rows of matrices are not equal!");
+			}
+			for(var i = 0; i < this.rows; i++) {
+				for(var j = 0; j < this.cols; j++) {
+					mat.matrix[i][j] = this.matrix[i][j] / matrix.matrix[i][j];
+				}
+			}
+		} else if(typeof matrix === "number") {
+			for(var i = 0; i < this.rows; i++) {
+				for(var j = 0; j < this.cols; j++) {
+					mat.matrix[i][j] = this.matrix[i][j] / matrix;
+				}
+			}
+		} else {
+			throw new Error(`Invalid type of parameter "${typeof matrix}", only supported are Numbers and Matrices!`);
 		}
 		return mat;
 	}
@@ -1268,7 +1292,9 @@ class Matrix {
 	 */
 	add(matrix) {
 		var mat = new Matrix(this.rows, this.cols);
-		if(!(matrix instanceof Matrix) || this.rows != matrix.rows || this.cols != matrix.cols) return undefined;
+		if(!(matrix instanceof Matrix) || this.rows != matrix.rows || this.cols != matrix.cols) {
+			throw new Error("Columns and rows of matrices are not equal!");
+		}
 
 		for(var i = 0; i < this.rows; i++) {
 			for(var j = 0; j < this.cols; j++) {
@@ -1286,11 +1312,9 @@ class Matrix {
 	 */
 	sub(matrix) {
 		var mat = new Matrix(this.rows, this.cols);
-		if(!(matrix instanceof Matrix) ||
-			this.rows != matrix.rows ||
-			this.cols != matrix.cols
-		)
-			return undefined;
+		if(!(matrix instanceof Matrix) || this.rows != matrix.rows || this.cols != matrix.cols) {
+			throw new Error("Columns and rows of matrices are not equal!");
+		}
 
 		for(var i = 0; i < this.rows; i++) {
 			for(var j = 0; j < this.cols; j++) {
@@ -1388,10 +1412,40 @@ class Matrix {
 		return identity;
 	}
 
+	det() {
+		if(this.rows != this.cols) throw new Error("Cannot calculate determinant of non-square matrix!");
+
+		if(this.rows == 1) return this.matrix[0][0];
+		if(this.rows == 2) return this.matrix[0][0] * this.matrix[1][1] - this.matrix[1][0] * this.matrix[0][1];
+
+		let sum = 0;
+		for(let i = 0; i < this.cols; i++) {
+			sum += this.matrix[0][i] * this.cofactor(0, i);
+		}
+		return sum;
+	}
+
+	cofactor(row, col) {
+		if(this.rows != this.cols) throw new Error("Cannot calculate cofactor of non-square matrix!");
+
+		const mat = new Matrix(this.rows - 1, this.cols - 1);
+
+		for(let i = 0; i < this.rows; i++) {
+			if(i == row) continue;
+			for(let j = 0; j < this.cols; j++) {
+				if(j == col) continue;
+				mat.matrix[i < row ? i : i - 1][j < col ? j : j - 1] = this.matrix[i][j];
+			}
+		}
+
+		return mat.det() * (row % 2 == col % 2 ? 1 : -1);
+	}
+
 	/**
 	 * Swaps two rows of the Matrix.
 	 * @param {number} i
 	 * @param {number} j
+	 * @returns {this}
 	 * @memberof Matrix
 	 */
 	swapRow(i, j) {
@@ -1400,12 +1454,15 @@ class Matrix {
 		const temp = this.matrix[i];
 		this.matrix[i] = this.matrix[j];
 		this.matrix[j] = temp;
+
+		return this;
 	}
 
 	/**
 	 * Swaps two columns of the Matrix.
 	 * @param {number} i
 	 * @param {number} j
+	 * @returns {this}
 	 * @memberof Matrix
 	 */
 	swapCol(i, j) {
@@ -1416,6 +1473,40 @@ class Matrix {
 			this.matrix[k][i] = this.matrix[k][j];
 			this.matrix[k][j] = temp;
 		}
+
+		return this;
+	}
+
+	/**
+	 * @param {number} i
+	 * @param {number[]} arr
+	 * @returns {this}
+	 * @memberof Matrix
+	 */
+	setRow(i, arr) {
+		if(i < 0 || i >= this.rows) throw new Error("Index out of bounds");
+		if(arr.length != this.cols) throw new Error("Array length must be equal to number of columns");
+
+		this.matrix[i] = arr;
+
+		return this;
+	}
+
+	/**
+	 * @param {number} j
+	 * @param {number[]} arr
+	 * @returns {this}
+	 * @memberof Matrix
+	 */
+	setCol(j, arr) {
+		if(j < 0 || j >= this.cols) throw new Error("Index out of bounds");
+		if(arr.length != this.rows) throw new Error("Array length must be equal to number of rows");
+
+		for(var i = 0; i < this.rows; i++) {
+			this.matrix[i][j] = arr[i];
+		}
+
+		return this;
 	}
 
 
@@ -1893,6 +1984,15 @@ class Color {
 	 * @memberof Color
 	 */
 	constructor(red = 0, green = 0, blue = 0, alpha = 1) {
+		/** @type {number} */
+		this.r = 0;
+		/** @type {number} */
+		this.g = 0;
+		/** @type {number} */
+		this.b = 0;
+		/** @type {number} */
+		this.a = 1;
+
 		if(red instanceof Color) {
 			//Copy
 			this.r = +red.r;
@@ -2056,6 +2156,7 @@ class Color {
 					else if(i == 3) return 0;
 					else if(i == 4) return map(h, min, max, 0, 255);
 					else if(i == 5) return 255;
+					else return 0;
 				};
 
 				//Hue
@@ -2103,45 +2204,95 @@ class Color {
 
 class ComplexNumber {
 	/**
-	 * Creates new Complex Number object.
-	 * @param {string | Array<number | string, number | string>} number String to parse complex number.
-	 * @param {string} sign Imaginary unit indicator
+	 * @typedef {Object} FormatterOptions
+	 * @prop {"a" | "t" | "e"} [form="a"] Number form to use. Supported a = algebraic, t = trigonometric, e = exponential
+	 * @prop {number} [round=-1] Number of decimal places to round to. -1 = no rounding
+	 * @prop {boolean} [sign=false] Whether to include the sign (if positive)
+	 * @prop {boolean} [spacing=false] Whether to include the spacing between sign and number
+	 * @prop {boolean} [radians=false] Whether to use radians instead of degrees
 	 */
-	constructor(number, sign = "i") {
+
+	/**
+	 * Creates new Complex Number object.
+	 * @param {string | Array<number | string, number | string>} input String to parse complex number.
+	 * @param {string} unit Imaginary unit identifier
+	 */
+	constructor(input, unit = "i") {
 		/* Parse */
-		var r, i;
+		let r, i, u;
 
-		if(typeof number === "string") {
-			number = number.replace(/\s/g, "").replace(/−/g, "-");
+		if(typeof input === "string") {
+			input = input.replace(/\s/g, "").replace(/−/g, "-");
 
-			i = (number.match(new RegExp(`[+\\-]?(?:[a-z0-9.]+[${sign}]|[${sign}][a-z0-9.]+)`, "")) || "0")[0];
-			r = number.replace(i, "") || "0";
+			const match = input.match(ComplexNumber.__getParseRegex());
+			if(!match) throw new TypeError(`Invalid complex number '${input}'`);
 
-			i = i == sign ? "1" : i.replace(sign, "");
-		} else if(number instanceof Array) {
-			r = number[0].toString();
-			i = number[1].toString();
-		} else throw new TypeError(number + " is not a valid complex number");
+			{
+				let r_s = match[1] + match[2] || match[6] + match[7] || match[14] + match[15] || match[19] + match[20] || match[21] + match[22];
+				let i_s = match[3] + match[4] || match[8] + match[10] || match[11] + match[12] || match[16] + match[18] || match[23] + match[24] || match[26] + match[28];
+				let u_s = match[5] || match[9] || match[13] || match[17] || match[25] || match[27];
+
+				if(u_s && !i_s) i = "1";	// a+i
+				if(!r_s) r_s = "0";			// bi
+				if(!i_s) i_s = "0";			// a
+				if(!u_s) u_s = "i";			// kinda invalid (this should never match)
+
+				const r_n = parseFloat(r_s);
+				const i_n = parseFloat(i_s);
+
+				if(isNaN(r_n)) throw new TypeError(`Invalid real part '${r_s}' of complex number '${input}'`);
+				if(isNaN(i_n)) throw new TypeError(`Invalid imaginary part '${i_s}' of complex number '${input}'`);
+
+				r = r_n;
+				i = i_n;
+				u = u_s;
+			}
+		} else if(input instanceof Array) {
+			//Convert to strings for safety
+			const r_s = input[0] + "";
+			const i_s = input[1] + "";
+
+			//Parse and precache strings into numbers
+			const r_n = parseFloat(r_s);
+			const i_n = parseFloat(i_s);
+
+			//Check for invalid numbers
+			if(isNaN(r_n)) throw new TypeError(`Invalid real part '${r_s}' of complex number '${input.join(", ")}'`);
+			if(isNaN(i_n)) throw new TypeError(`Invalid imaginary part '${i_s}' of complex number '${input.join(", ")}'`);
+			if(unit.length !== 1 || !unit.match(/[a-z]/i)) throw new TypeError(`Invalid imaginary unit '${unit}'`);
+
+			r = r_n;
+			i = i_n;
+			u = unit;
+		} else {
+			throw new TypeError(`Invalid complex number '${input}'`);
+		}
 
 		/* Init */
 
 		/**
 		 * Real part of the number
-		 * @type {string}
+		 * @type {number}
 		 */
 		this.r = r;
 
 		/**
 		 * Imaginary part of the number
-		 * @type {string}
+		 * @type {number}
 		 */
 		this.i = i;
 
 		/**
-		 * Imaginary part identifier (usually `i` or `j`)
+		 * Imaginary part unit (usually `i` or `j`)
 		 * @type {string}
 		 */
-		this.sign = sign;
+		this.unit = unit;
+
+		/**
+		 * @deprecated Use `this.unit` instead
+		 * @type {string}
+		 */
+		this.sign = this.unit;
 
 		/**
 		 * Distance of number from origin
@@ -2153,81 +2304,220 @@ class ComplexNumber {
 		 * Angle between origin and number
 		 * @type {number}
 		 */
-		this.angle = Math.atan(+this.i / +this.r);
+		this.angle = Math.atan2(+this.i, +this.r);
 	}
 
 	/**
 	 *
-	 * @param {ComplexNumber} x
+	 * @param {ComplexNumber | number} x
 	 * @return {ComplexNumber} 
 	 * @memberof ComplexNumber
 	 */
 	add(x) {
-		if(this.sign != x.sign) throw new TypeError("Cannot add two numbers with different imaginary numbers");
+		const isScalar = typeof x === "number";
+		if(!isScalar && this.unit != x.unit) throw new TypeError("Cannot add two numbers with different imaginary units");
 
-		var r = +this.r + +x.r;
-		var c = +this.i + +x.i;
+		let r, c;
 
-		return new ComplexNumber([r.toString(), c.toString()], this.sign);
+		if(isScalar) {
+			r = +this.r + x;
+			c = +this.i;
+		} else {
+			r = +this.r + +x.r;
+			c = +this.i + +x.i;
+		}
+
+		return new ComplexNumber([r, c], this.unit);
 	}
 
 	/**
 	 *
-	 * @param {ComplexNumber} x
+	 * @param {ComplexNumber | number} x
 	 * @return {ComplexNumber} 
 	 * @memberof ComplexNumber
 	 */
 	sub(x) {
-		if(this.sign != x.sign) throw new TypeError("Cannot subtract two numbers with different imaginary numbers");
+		const isScalar = typeof x === "number";
+		if(!isScalar && this.unit != x.unit) throw new TypeError("Cannot subtract two numbers with different imaginary units");
 
-		var r = +this.r - +x.r;
-		var c = +this.i - +x.i;
+		let r, c;
 
-		return new ComplexNumber([r.toString(), c.toString()], this.sign);
+		if(isScalar) {
+			r = +this.r - x;
+			c = +this.i;
+		} else {
+			r = +this.r - +x.r;
+			c = +this.i - +x.i;
+		}
+
+		return new ComplexNumber([r, c], this.unit);
 	}
 
 	/**
 	 *
-	 * @param {ComplexNumber} x
+	 * @param {ComplexNumber | number} x
 	 * @return {ComplexNumber} 
 	 * @memberof ComplexNumber
 	 */
 	mult(x) {
-		if(this.sign != x.sign) throw new TypeError("Cannot multiply two numbers with different imaginary numbers");
+		const isScalar = typeof x === "number";
+		if(!isScalar && this.unit != x.unit) throw new TypeError("Cannot multiply two numbers with different imaginary units");
 
-		var r = +this.r * +x.r - +this.i * +x.i;
-		var c = +this.r * +x.i + +this.i * +x.r;
+		let r, c;
 
-		return new ComplexNumber([r.toString(), c.toString()], this.sign);
+		if(isScalar) {
+			r = +this.r * x;
+			c = +this.i * x;
+		} else {
+			r = +this.r * +x.r - +this.i * +x.i;
+			c = +this.r * +x.i + +this.i * +x.r;
+		}
+
+		return new ComplexNumber([r, c], this.unit);
 	}
 
 	/**
 	 *
-	 * @param {ComplexNumber} x
+	 * @param {ComplexNumber | number} x
 	 * @return {ComplexNumber} 
 	 * @memberof ComplexNumber
 	 */
 	div(x) {
-		if(this.sign != x.sign) throw new TypeError("Cannot divide two numbers with different imaginary numbers");
+		const isScalar = typeof x === "number";
+		if(!isScalar && this.unit != x.unit) throw new TypeError("Cannot divide two numbers with different imaginary units");
 
-		var r = +this.r * +x.r + +this.i * +x.i;
-		var c = +this.i * +x.r - +this.r * +x.i;
-		var d = +x.r * +x.r + +x.i * +x.i;
+		let r, c;
 
-		return new ComplexNumber([r + "/" + d, c + "/" + d], this.sign);
+		if(isScalar) {
+			r = +this.r / x;
+			c = +this.i / x;
+		} else {
+			const d = +x.r * +x.r + +x.i * +x.i;
+			r = (+this.r * +x.r + +this.i * +x.i) / d;
+			c = (+this.i * +x.r - +this.r * +x.i) / d;
+		}
+
+		return new ComplexNumber([r, c], this.unit);
+	}
+
+	copy() {
+		return new ComplexNumber([this.r, this.i], this.unit);
 	}
 
 	/**
-	 *
-	 * @param {"a" | "t" | "e"} form
+	 * @param {"a" | "t" | "e" | FormatterOptions} [form="a"]
 	 * @return {string} 
 	 * @memberof ComplexNumber
 	 */
 	toString(form = "a") {
-		if(form == "a") return `${this.r}${this.i.replace(/^([^+\-])/, " + $1")}${this.sign}`;
-		else if(form == "t") return `${this.distance.toFixed(2)} * (cos(${~~rad2deg(this.angle)}°) + ${this.sign} * sin(${~~rad2deg(this.angle)}°))`;
-		else if(form == "e") return `${this.distance.toFixed(2)} * e^(${this.sign} * ${~~rad2deg(this.angle)}°)`;
-		else throw new TypeError("Unknown number form. Supported a = algebraic, t = trigonometric, e = exponential");
+		const options = typeof form === "string" ? {
+			form: form,
+			round: -1,
+			sign: false,
+			spacing: false,
+			radians: false
+		} : form;
+
+		return ComplexNumber.format(this, options);
+	}
+
+	/**
+	 * @param {number} n
+	 * @param {"a" | "t" | "e" | FormatterOptions} [form="a"]
+	 * @return {string} 
+	 * @memberof ComplexNumber
+	 */
+	toFixed(n, form = "a") {
+		const options = typeof form === "string" ? {
+			form: form,
+			round: n,
+			sign: false,
+			spacing: false,
+			radians: false
+		} : form;
+
+		return ComplexNumber.format(this, options);
+	}
+
+	/**
+	 * @static
+	 * @param {ComplexNumber} number
+	 * @param {FormatterOptions} [options={}]
+	 * @return {string}
+	 * @memberof ComplexNumber
+	 */
+	static format(number, options = {}) {
+		const {
+			form = "a",
+			round = -1,
+			sign = false,
+			spacing = false,
+			radians = false
+		} = options;
+
+		if(round < -1) throw new RangeError("round must be a positive integer or -1");
+		const SP = spacing ? " " : "";
+
+		//Helper function to format real numbers
+		const formatRealNumber = (/**@type {number}*/_number, _sign = sign, _spacing = spacing) => {
+			let str = "";
+
+			if(_number < 0) str += "-";
+			else if(_sign) str += "+";
+			if(_spacing) str += " ";
+
+			str += roundRealNumber(Math.abs(_number));
+
+			return str;
+		};
+
+		const formatAngle = (/**@type {number}*/_angle, _radians = radians) => {
+			return _radians ? roundRealNumber(_angle) : roundRealNumber(rad2deg(_angle)) + "°";
+		};
+
+		const roundRealNumber = (/**@type {number}*/_number, _round = round) => {
+			return _round == -1 ? _number : _number.toFixed(_round);
+		};
+
+		//Format the complex number
+		if(form == "a") {
+			const real = formatRealNumber(number.r, false, false);
+			const imaginary = formatRealNumber(number.i, true);
+
+			return `${real}${SP}${imaginary}${number.unit}`;
+		} else if(form == "t") {
+			const angle = formatAngle(number.angle);
+			const distance = roundRealNumber(number.distance);
+
+			return `${distance}${SP}*${SP}(cos(${angle})${SP}+${SP}${number.unit}${SP}*${SP}sin(${angle}))`;
+		} else if(form == "e") {
+			const angle = formatAngle(number.angle);
+			const distance = roundRealNumber(number.distance);
+
+			return `${distance}${SP}*${SP}e^(${number.unit}${SP}*${SP}${angle})`;
+		} else {
+			throw new TypeError("Unknown number form. Supported a = algebraic, t = trigonometric, e = exponential");
+		}
+	}
+
+	static __getParseRegex() {
+		if(this.__parseRegex) return this.__parseRegex;
+
+		const DIGITS = String.raw`([0-9.]+)`;
+		const SIGN = String.raw`([+-])`;
+		const IDENTIFIER = String.raw`([a-z])`;
+
+		const syntax = [
+				 /*1*/`${SIGN}?${DIGITS}${SIGN}${DIGITS}${IDENTIFIER}`, // a+bi
+				 /*6*/`${SIGN}?${DIGITS}${SIGN}${IDENTIFIER}${DIGITS}`, // a+ib
+				/*11*/`${SIGN}?${DIGITS}${IDENTIFIER}${SIGN}${DIGITS}`, // bi+a
+				/*16*/`${SIGN}?${IDENTIFIER}${DIGITS}${SIGN}${DIGITS}`, // ib+a
+				/*21*/`${SIGN}?${DIGITS}`, 								// a
+				/*23*/`${SIGN}?${DIGITS}${IDENTIFIER}`, 				// bi
+				/*26*/`${SIGN}?${IDENTIFIER}${DIGITS}` 					// ib
+		];
+
+		return this.__parseRegex = new RegExp(`^(?:${syntax.join("|")})$`, "mi");
 	}
 }
 
@@ -2263,7 +2553,7 @@ class EventListener {
 	 * @returns {Promise<T | undefined>} Returned value of the callback function
 	 * @template T
 	 */
-	async dispatchEvent(type, data = {}, callback = null) {
+	async dispatchEvent(type, data = {}, callback = undefined) {
 		//Setup Event Object
 		const defaultData = {
 			type: type,
@@ -2393,7 +2683,7 @@ class EventListenerStatic {
 	 * @returns {Promise<T | undefined>} Returned value of the callback function
 	 * @template T
 	 */
-	static async dispatchEvent(type, data = {}, callback = null) {
+	static async dispatchEvent(type, data = {}, callback = undefined) {
 		//Setup Event Object
 		const defaultData = {
 			type: type,
@@ -2710,7 +3000,7 @@ if(typeof document !== "undefined") {
 		VISIBILITY_CHANGE = "webkitvisibilitychange";
 	}
 }
-/* ==== Modifing defaults ==== */
+/* ==== Modifying defaults ==== */
 
 /**
  * Remove diacritics from the string
