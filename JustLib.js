@@ -2025,6 +2025,16 @@ class Color {
 		return 0.2126 * this.r / 255 + 0.7152 * this.g / 255 + 0.0722 * this.b / 255;
 	}
 
+	/**
+	 * Inverts the color.
+	 * @memberof Color
+	 */
+	invert() {
+		this.r = 255 - this.r;
+		this.g = 255 - this.g;
+		this.b = 255 - this.b;
+	}
+
 	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Calls a defined callback function on each color channel, and returns new Color object that contains the results.
