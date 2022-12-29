@@ -2026,13 +2026,16 @@ class Color {
 	}
 
 	/**
-	 * Inverts the color.
+	 * Inverts the color (mutates the current color).
+	 * @return {this}
 	 * @memberof Color
 	 */
 	invert() {
 		this.r = 255 - this.r;
 		this.g = 255 - this.g;
 		this.b = 255 - this.b;
+
+		return this;
 	}
 
 	// eslint-disable-next-line valid-jsdoc
