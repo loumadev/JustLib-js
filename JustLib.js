@@ -1514,6 +1514,7 @@ class Matrix {
 	 * Sets each value to random number in given range.
 	 * @param {number} from Range from.
 	 * @param {number} to Range to.
+	 * @returns {this}
 	 */
 	randomize(from = -1, to = 1) {
 		for(var i = 0; i < this.rows; i++) {
@@ -1521,6 +1522,8 @@ class Matrix {
 				this.matrix[i][j] = random(from, to, false);
 			}
 		}
+
+		return this;
 	}
 
 	/**
