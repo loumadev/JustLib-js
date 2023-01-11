@@ -1223,7 +1223,7 @@ class Matrix {
 	 * @returns {Matrix}
 	 */
 	mult(matrix, hadamard = false) {
-		var isMat = matrix instanceof Matrix;
+		var isMat = Matrix.isMatrix(matrix);
 		var mMat = isMat ? matrix : this;
 		var mat = new Matrix(this.rows, mMat.cols);
 
@@ -1264,7 +1264,7 @@ class Matrix {
 	div(matrix) {
 		const mat = new Matrix(this.rows, this.cols);
 
-		if(matrix instanceof Matrix) {
+		if(Matrix.isMatrix(matrix)) {
 			if(this.rows != matrix.rows || this.cols != matrix.cols) {
 				throw new Error("Columns and rows of matrices are not equal!");
 			}
@@ -1286,19 +1286,29 @@ class Matrix {
 	}
 
 	/**
-	 * Adds Matrix to another Matrix.
-	 * @param {Matrix} matrix Matrix.
+	 * Adds matrix or scalar to current matrix. (returns new matrix)
+	 * @param {Matrix | number} matrix Matrix or scalar.
 	 * @returns {Matrix}
 	 */
 	add(matrix) {
-		var mat = new Matrix(this.rows, this.cols);
-		if(!(matrix instanceof Matrix) || this.rows != matrix.rows || this.cols != matrix.cols) {
-			throw new Error("Columns and rows of matrices are not equal!");
+		const isMatrix = Matrix.isMatrix(matrix);
+
+		let type = 0;
+		if(isMatrix) {
+			// @ts-ignore
+			if(this.rows === matrix.rows && this.cols === matrix.cols) type = 1;
+			// @ts-ignore
+			else if(this.rows === matrix.rows && matrix.cols === 1) type = 2;
+			// @ts-ignore
+			else if(this.cols === matrix.cols && matrix.rows === 1) type = 3;
+			else throw new Error("Columns and rows of matrices are not equal or matrix to add is not a vector!");
 		}
 
+		var mat = new Matrix(this.rows, this.cols);
 		for(var i = 0; i < this.rows; i++) {
 			for(var j = 0; j < this.cols; j++) {
-				mat.matrix[i][j] = this.matrix[i][j] + matrix.matrix[i][j];
+				// @ts-ignore
+				mat.matrix[i][j] = this.matrix[i][j] + (isMatrix ? (type === 1 ? matrix.matrix[i][j] : (type === 2 ? matrix.matrix[i][0] : matrix.matrix[0][j])) : matrix);
 			}
 		}
 
@@ -1306,21 +1316,31 @@ class Matrix {
 	}
 
 	/**
-	 * Substracts Matrix from another Matrix.
-	 * @param {Matrix} matrix Matrix.
+	 * Subtracts matrix or scalar from current matrix. (returns new matrix)
+	 * @param {Matrix | number} matrix Matrix or scalar.
 	 * @returns {Matrix}
 	 */
 	sub(matrix) {
-		var mat = new Matrix(this.rows, this.cols);
-		if(!(matrix instanceof Matrix) || this.rows != matrix.rows || this.cols != matrix.cols) {
-			throw new Error("Columns and rows of matrices are not equal!");
+		const isMatrix = Matrix.isMatrix(matrix);
+
+		let type = 0;
+		if(isMatrix) {
+			if(this.rows === matrix.rows && this.cols === matrix.cols) type = 1;
+			// @ts-ignore
+			else if(this.rows === matrix.rows && matrix.cols === 1) type = 2;
+			// @ts-ignore
+			else if(this.cols === matrix.cols && matrix.rows === 1) type = 3;
+			else throw new Error("Columns and rows of matrices are not equal or matrix to add is not a vector!");
 		}
 
+		var mat = new Matrix(this.rows, this.cols);
 		for(var i = 0; i < this.rows; i++) {
 			for(var j = 0; j < this.cols; j++) {
-				mat.matrix[i][j] = this.matrix[i][j] - matrix.matrix[i][j];
+				// @ts-ignore
+				mat.matrix[i][j] = this.matrix[i][j] - (isMatrix ? (type === 1 ? matrix.matrix[i][j] : (type === 2 ? matrix.matrix[i][0] : matrix.matrix[0][j])) : matrix);
 			}
 		}
+
 		return mat;
 	}
 
@@ -1585,6 +1605,18 @@ class Matrix {
 		}
 
 		return mat;
+	}
+
+	// eslint-disable-next-line valid-jsdoc
+	/**
+	 * @static
+	 * @param {unknown} matrix
+	 * @return {matrix is Matrix} 
+	 * @memberof Matrix
+	 */
+	static isMatrix(matrix) {
+		// @ts-ignore
+		return matrix instanceof Matrix || matrix && typeof matrix.rows === "number" && typeof matrix.cols === "number" && typeof matrix.matrix === "object";
 	}
 }
 
