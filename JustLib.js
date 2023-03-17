@@ -1966,6 +1966,102 @@ class Dimensions {
 	}
 
 	/**
+	 * Expands the dimensions by a given value or vector.
+	 * @param {Vector | number} n Vector or number to expand the dimensions by.
+	 * @return {this} 
+	 * @memberof Dimensions
+	 */
+	add(n) {
+		if(typeof n === "number") {
+			this.w += n;
+			this.h += n;
+			this.d += n;
+			this.r += n;
+		} else {
+			this.w += n.x;
+			this.h += n.y;
+			this.d += n.z;
+
+			//Only compute the magnitdue if the radius is not 0 to save some performance.
+			if(this.r) this.r += n.mag();
+		}
+
+		return this;
+	}
+
+	/**
+	 * Reduces the dimensions by a given value or vector.
+	 * @param {Vector | number} n Vector or number to subtract from the dimensions.
+	 * @return {this} 
+	 * @memberof Dimensions
+	 */
+	sub(n) {
+		if(typeof n === "number") {
+			this.w -= n;
+			this.h -= n;
+			this.d -= n;
+			this.r -= n;
+		} else {
+			this.w -= n.x;
+			this.h -= n.y;
+			this.d -= n.z;
+
+			//Only compute the magnitdue if the radius is not 0 to save some performance.
+			if(this.r) this.r -= n.mag();
+		}
+
+		return this;
+	}
+
+	/**
+	 * Scales the dimensions by a given factor or vector.
+	 * @param {Vector | number} n Vector or number to scale by.
+	 * @return {this} 
+	 * @memberof Dimensions
+	 */
+	mult(n) {
+		if(typeof n === "number") {
+			this.w *= n;
+			this.h *= n;
+			this.d *= n;
+			this.r *= n;
+		} else {
+			this.w *= n.x;
+			this.h *= n.y;
+			this.d *= n.z;
+
+			//Only compute the magnitdue if the radius is not 0 to save some performance.
+			if(this.r) this.r *= n.mag();
+		}
+
+		return this;
+	}
+
+	/**
+	 * Divides the dimensions by a given factor or vector.
+	 * @param {Vector | number} n Vector or number to divide by.
+	 * @return {this} 
+	 * @memberof Dimensions
+	 */
+	div(n) {
+		if(typeof n === "number") {
+			this.w *= n;
+			this.h *= n;
+			this.d *= n;
+			this.r *= n;
+		} else {
+			this.w *= n.x;
+			this.h *= n.y;
+			this.d *= n.z;
+
+			//Only compute the magnitdue if the radius is not 0 to save some performance.
+			if(this.r) this.r *= n.mag();
+		}
+
+		return this;
+	}
+
+	/**
 	 * Creates a new Dimensions instance initialized with the same dimension values as current Dimensions instance.
 	 * @return {Dimensions} 
 	 * @memberof Dimensions
