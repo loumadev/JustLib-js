@@ -2209,7 +2209,7 @@ class Color {
 	/**
 	 * @returns {[number, number, number]}
 	 */
-	toHLS() {
+	toHSL() {
 		const r = this.r / 255;
 		const g = this.g / 255;
 		const b = this.b / 255;
@@ -2217,8 +2217,8 @@ class Color {
 		const min = Math.min(r, g, b);
 
 		let h = 0;
-		let l = (max + min) / 2;
 		let s = 0;
+		let l = (max + min) / 2;
 
 		if(max !== min) {
 			var d = max - min;
@@ -2231,7 +2231,7 @@ class Color {
 			h /= 6;
 		}
 
-		return [h, l, s];
+		return [h, s, l];
 	}
 
 	/**
@@ -2354,12 +2354,12 @@ class Color {
 
 	/**
 	 * @param {number} h
-	 * @param {number} l
 	 * @param {number} s
+	 * @param {number} l
 	 * @returns {Color}
 	 * @memberof Color
 	 */
-	static fromHLS(h, l, s) {
+	static fromHSL(h, s, l) {
 		let r, g, b;
 
 		if(s === 0) {
