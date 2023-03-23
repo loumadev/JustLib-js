@@ -2210,7 +2210,7 @@ class Color {
 	 * Returns a string representing the color using specified format
 	 * Supported formats: RGB, RGBA, HEX, HEXA
 	 * Default format: RGBA
-	 * @param {"RGB" | "RGBA" | "HEX" | "HEXA"} [format="RGBA"]
+	 * @param {"RGB" | "RGBA" | "HEX" | "HEXA" | "rgb" | "rgba" | "hex" | "hexa"} [format="RGBA"]
 	 * @returns {string} color
 	 */
 	toString(format = "RGBA") {
