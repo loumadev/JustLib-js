@@ -181,18 +181,43 @@ var JL = function(root, selector, index) {
  */
 var get = JL;
 
-function setCSSproperty(elm, property, value) {
-	var prefixes = ["", "-webkit-", "-moz-", "-ms-", "-o-"];
-	for(var i = 0; i < prefixes.length; i++) {
-		elm.style[prefixes[i] + property] = value;
+/**
+ * Sets CSS Property of HTML Element with prefixes.
+ * @param {HTMLElement} elm Element to set property to
+ * @param {string} property Property name to set
+ * @param {any} value Property value to set
+ * @return {string} Value that was set
+ */
+function setCSSProperty(elm, property, value) {
+	value = value + "";
+	for(const prefix of ["", "-webkit-", "-moz-", "-ms-", "-o-"]) {
+		elm.style[prefix + property] = value;
 	}
 	return value;
 }
 
-function setCSSvariable(name, value, elm = document.documentElement) {
+/**
+ * @deprecated Use `setCSSProperty` instead
+ */
+var setCSSproperty = setCSSProperty;
+
+/**
+ * Sets CSS Property of HTML Element with prefixes.
+ * @param {string} name Name of CSS variable to set
+ * @param {any} value Value to set
+ * @param {HTMLElement} [elm] Element to set property to (default: `document.documentElement`)
+ * @return {string} Value that was set
+ */
+function setCSSVariable(name, value, elm = document.documentElement) {
+	value = value + "";
 	elm.style.setProperty("--" + name, value);
 	return value;
 }
+
+/**
+ * @deprecated Use `setCSSVariable` instead
+ */
+var setCSSvariable = setCSSVariable;
 
 function encodeHTML(text) {
 	var node = document.createElement("span");
@@ -3505,7 +3530,9 @@ if(typeof module !== "undefined") {
 		getPath,
 		get,
 		setCSSproperty,
+		setCSSProperty,
 		setCSSvariable,
+		setCSSVariable,
 		encodeHTML,
 		decodeHTML,
 		getAttributes,
