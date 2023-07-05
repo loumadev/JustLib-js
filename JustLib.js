@@ -1982,6 +1982,221 @@ class Vector {
 }
 
 
+class Quaternion {
+	/**
+	 * Creates an instance of Quaternion.
+	 * @param {number} [x=0]
+	 * @param {number} [y=0]
+	 * @param {number} [z=0]
+	 * @param {number} [w=1]
+	 * @memberof Quaternion
+	 */
+	constructor(x = 0, y = 0, z = 0, w = 1) {
+		this.x = +x || 0;
+		this.y = +y || 0;
+		this.z = +z || 0;
+		this.w = +w || 1;
+	}
+
+	/**
+	 * Sets the Quaternion from given axis and angle.
+	 * @param {Vector} axis Axis to rotate around.
+	 * @param {number} angle Angle to rotate by.
+	 * @return {this} 
+	 * @memberof Quaternion
+	 */
+	setAxisAngle(axis, angle) {
+		const halfAngle = angle / 2;
+		const s = Math.sin(halfAngle);
+
+		this.x = axis.x * s;
+		this.y = axis.y * s;
+		this.z = axis.z * s;
+		this.w = Math.cos(halfAngle);
+
+		return this;
+	}
+
+	/**
+	 * Sets the Quaternion from given Euler angles.
+	 * @param {number} x X angle.
+	 * @param {number} y Y angle.
+	 * @param {number} z Z angle.
+	 * @return {this}
+	 * @memberof Quaternion
+	 */
+	setEulerAngles(x, y, z) {
+		const cos = Math.cos;
+		const sin = Math.sin;
+
+		const c1 = cos(x / 2);
+		const c2 = cos(y / 2);
+		const c3 = cos(z / 2);
+
+		const s1 = sin(x / 2);
+		const s2 = sin(y / 2);
+		const s3 = sin(z / 2);
+
+		// XYZ
+		this.x = s1 * c2 * c3 + c1 * s2 * s3;
+		this.y = c1 * s2 * c3 - s1 * c2 * s3;
+		this.z = c1 * c2 * s3 + s1 * s2 * c3;
+		this.w = c1 * c2 * c3 - s1 * s2 * s3;
+
+		return this;
+	}
+
+	/**
+	 * Sets the Quaternion from given unit vectors.
+	 * @param {Vector} vFrom The vector to rotate from.
+	 * @param {Vector} vTo The vector to rotate to.
+	 * @return {this}
+	 * @memberof Quaternion
+	 */
+	setUnitVectors(vFrom, vTo) {
+		let r = vFrom.dot(vTo) + 1;
+
+		if(r < Number.EPSILON) {
+			r = 0;
+
+			if(Math.abs(vFrom.x) > Math.abs(vFrom.z)) {
+				this.x = -vFrom.y;
+				this.y = vFrom.x;
+				this.z = 0;
+				this.w = r;
+			} else {
+				this.x = 0;
+				this.y = -vFrom.z;
+				this.z = vFrom.y;
+				this.w = r;
+			}
+		} else {
+			this.x = vFrom.y * vTo.z - vFrom.z * vTo.y;
+			this.y = vFrom.z * vTo.x - vFrom.x * vTo.z;
+			this.z = vFrom.x * vTo.y - vFrom.y * vTo.x;
+			this.w = r;
+		}
+
+		return this.normalize();
+	}
+
+	/**
+	 * Sets the Quaternion from quaternion multiplication of given Quaternions.
+	 * @param {Quaternion} q1 The first Quaternion.
+	 * @param {Quaternion} q2 The second Quaternion.
+	 * @return {this} q1 * q2
+	 * @memberof Quaternion
+	 */
+	setMultiply(q1, q2) {
+		const ax = q1.x, ay = q1.y, az = q1.z, aw = q1.w;
+		const bx = q2.x, by = q2.y, bz = q2.z, bw = q2.w;
+
+		this.x = ax * bw + aw * bx + ay * bz - az * by;
+		this.y = ay * bw + aw * by + az * bx - ax * bz;
+		this.z = az * bw + aw * bz + ax * by - ay * bx;
+		this.w = aw * bw - ax * bx - ay * by - az * bz;
+
+		return this;
+	}
+
+	/**
+	 * Calculates the angle between current Quaternion and given Quaternion.
+	 * @param {Quaternion} q Quaternion to calculate angle to.
+	 * @return {number} Calculated angle in radians.
+	 * @memberof Quaternion
+	 */
+	angleTo(q) {
+		return 2 * Math.acos(Math.abs(clamp(this.dot(q), -1, 1)));
+	}
+
+	/**
+	 * Calculates the dot product of current Quaternion and given Quaternion.
+	 * @param {Quaternion} q Quaternion to calculate dot product with.
+	 * @return {number} Calculated dot product.
+	 * @memberof Quaternion
+	 */
+	dot(q) {
+		return this.x * q.x + this.y * q.y + this.z * q.z + this.w * q.w;
+	}
+
+	/**
+	 * Calculates the length of current Quaternion.
+	 * @return {number} 
+	 * @memberof Quaternion
+	 */
+	length() {
+		return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w);
+	}
+
+	/**
+	 * Normalizes current Quaternion.
+	 * @return {this} 
+	 * @memberof Quaternion
+	 */
+	normalize() {
+		let l = this.length();
+
+		if(l === 0) {
+			this.x = 0;
+			this.y = 0;
+			this.z = 0;
+			this.w = 1;
+		} else {
+			l = 1 / l;
+
+			this.x *= l;
+			this.y *= l;
+			this.z *= l;
+			this.w *= l;
+		}
+
+		return this;
+	}
+
+	/**
+	 * Inverts current Quaternion.
+	 * @return {this} 
+	 * @memberof Quaternion
+	 */
+	invert() {
+		this.x = -this.x;
+		this.y = -this.y;
+		this.z = -this.z;
+
+		return this;
+	}
+
+	/**
+	 * Multiplies current Quaternion by given Quaternion.
+	 * @param {Quaternion} q Quaternion to multiply by.
+	 * @return {this}
+	 * @memberof Quaternion
+	 */
+	multiply(q) {
+		return this.setMultiply(this, q);
+	}
+
+	/**
+	 * Premultiplies current Quaternion by given Quaternion.
+	 * @param {Quaternion} q Quaternion to premultiply by.
+	 * @return {this}
+	 * @memberof Quaternion
+	 */
+	premultiply(q) {
+		return this.setMultiply(q, this);
+	}
+
+	/**
+	 * Creates a new Quaternion instance initialized with the same components as current Quaternion.
+	 * @return {Quaternion} 
+	 * @memberof Quaternion
+	 */
+	copy() {
+		return new Quaternion(this.x, this.y, this.z, this.w);
+	}
+}
+
+
 class Dimensions {
 	constructor(width = 0, height = 0, depth = 0, radius = 0) {
 		this.w = width || 0;
@@ -3517,6 +3732,7 @@ if(typeof module !== "undefined") {
 		RandomGenerator,
 		DropArea,
 		Vector,
+		Quaternion,
 
 		deg2rad,
 		rad2deg,
