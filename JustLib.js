@@ -428,17 +428,24 @@ function indexOf(arr, elm) {
 	return -1;
 }
 
+// eslint-disable-next-line valid-jsdoc
 /**
- * 
- * @param {string} html 
- * @returns {ChildNode | NodeListOf<ChildNode>}
+ * @type {
+		((html: string) => (HTMLElement | HTMLElement[])) &
+		((html: string, index: number) => HTMLElement) &
+		((html: string, asArray: boolean) => HTMLElement[])
+  }
  */
-function parseHTML(html) {
-	var template = document.createElement("template");
-	template.innerHTML = html.trim();
-	var elms = template.content.childNodes;
-	return elms.length == 1 ? elms[0] : elms;
-}
+var parseHTML = function(html, index) {
+	const template = document.createElement("template");
+	template.innerHTML = html.replace(/<!--.*?-->/g, "").replace(/>\s+</g, "><").trim();
+
+	const elms = /**@type {HTMLElement[]}*/([...template.content.childNodes]);
+
+	if(index === true) return elms;
+	else if(typeof index === "number") return elms[index];
+	else return elms.length == 1 ? elms[0] : elms;
+};
 
 // eslint-disable-next-line valid-jsdoc
 /**
