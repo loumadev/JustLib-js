@@ -149,12 +149,12 @@ function getPath(elm) {
 // eslint-disable-next-line valid-jsdoc
 /**
  * @type {
-		((selector: string) => Element | Element[]) &
-		((selector: string, index: number) => Element) &
-		((selector: string, index: true) => Element[]) &
-		((root: HTMLElement, selector: string) => Element | Element[]) &
-		((root: HTMLElement, selector: string, index: number) => Element) &
-		((root: HTMLElement, selector: string, index: true) => Element[])
+		((selector: string) => HTMLElement | HTMLElement[]) &
+		((selector: string, index: number) => HTMLElement) &
+		((selector: string, index: true) => HTMLElement[]) &
+		((root: HTMLElement, selector: string) => HTMLElement | HTMLElement[]) &
+		((root: HTMLElement, selector: string, index: number) => HTMLElement) &
+		((root: HTMLElement, selector: string, index: true) => HTMLElement[])
   }
  */
 var JL = function(root, selector, index) {
