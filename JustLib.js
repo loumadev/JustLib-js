@@ -3761,6 +3761,7 @@ if(typeof module !== "undefined") {
 		Vector,
 		Quaternion,
 
+		JL,
 		deg2rad,
 		rad2deg,
 		dec2bin,
