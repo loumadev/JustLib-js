@@ -3455,18 +3455,38 @@ if(typeof document !== "undefined") {
 
 /**
  * Remove diacritics from the string
+ * @param {string} string String to remove diacritics from
+ * @returns {string} New string without diacritics
+ */
+function removeAccents(string) {
+	return string.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+/**
+ * Remove diacritics from the string
+ * @deprecated Use `removeAccents(string)` instead
  * @returns {string} New string without diacritics
  */
 String.prototype["removeAccents"] = function() {
-	return this.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+	return removeAccents(/**@type {string}*/(this));
 };
 
 /**
  * Capitalize the string
+ * @param {string} string String to capitalize
+ * @returns {string} New string with first letter capital
+ */
+function capitalize(string) {
+	return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+/**
+ * Capitalize the string
+ * @deprecated Use `capitalize(string)` instead
  * @returns {string} New string with first letter capital
  */
 String.prototype["capitalize"] = function() {
-	return this.charAt(0).toUpperCase() + this.slice(1);
+	return capitalize(/**@type {string}*/(this));
 };
 
 try {
@@ -3807,6 +3827,8 @@ if(typeof module !== "undefined") {
 		Highlight,
 		createSlider,
 		createWindow,
+		removeAccents,
+		capitalize,
 
 		HIDDEN,
 		VISIBILITY_CHANGE,
