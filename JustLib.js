@@ -904,7 +904,7 @@ function Highlight(str, {
 	colorVariables = true,
 	fontSize = 14,
 	lineHeight = 18,
-	allowSelection = true,
+	allowSelection = false,
 	debug = false
 } = {}, onerror = undefined) {
 	var Colors = {
@@ -913,6 +913,7 @@ function Highlight(str, {
 		"(\\/\\/.*?(?:\\n|$)|\\/\\*(?:.|\\n|\\r)*?\\*\\/)": "COMMENT",
 		"(?<!\\w)(?<!\\w)(\\/(?:\\\\\\/|.)*?\\/[gmixsuXUAJD]*)(?!\\w)(?!\\s\\w)": "REGEX",
 		"(?:^|[^a-zA-Z0-9_$])(?:\\+|-)?((?:0(?:[xX][0-9a-fA-F]+|[oO][0-7]+|[bB][0-1]+)|(?:\\d+\\.|\\.)?\\d+)(?:e(?:\\+|-)?\\d+)?)": "NUMBER",
+		[String.raw`[{,]\s*(["'\`](?:[^"'\`\\]|\\.)*["'\`]):`]: "VARIABLE",
 		"(\".*?\"(?<!\\\\\")|'.*?'(?<!\\\\'))": "STRING",
 		/*"(?:`|})((?:.|\\n)*?)(?:`|\\${)(?<!\\\\`)": "#ffe484", //broken*/
 		/*"(`)": "#ffe484",*/
@@ -1187,7 +1188,7 @@ function Highlight(str, {
 		background: var(--SELECTION);
 	}`;
 
-	var js = `toggleClass(get(this, '.selected'), 'selected', false); toggleClass(event.path.filter(e => e.tagName && e.tagName.toLowerCase() == 'tr')[0], 'selected', true);`;
+	var js = `toggleClass(get(this, '.selected'), 'selected', false); toggleClass(event.composedPath().filter(e => e.tagName && e.tagName.toLowerCase() == 'tr')[0], 'selected', true);`;
 
 	return (`
 		<div 
