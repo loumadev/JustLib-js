@@ -2974,232 +2974,390 @@ class ComplexNumber {
 }
 
 class EventListener {
+	/**
+	 * Creates an instance of EventListener.
+	 * @memberof EventListener
+	 */
 	constructor() {
-		this.listeners = [];
+		/** @type {Map<string, JLListener[]>} */
+		this.listenersMap = new Map();
 
 		/**
+		 * @type {
+			((type: string, callback: (event: JLEvent) => void) => JLListener) &
+			((type: "__listenerAddEvent__", callback: (event: JLEvent & {listener: JLListener}) => void) => JLListener)
+		   }
 		 * @alias EventListener.addEventListener
 		 */
-		this.on = this.addEventListener;
+		this.on = /**@type {any}*/(this.addEventListener);
 	}
 
 	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Add event handler for specific event
 	 * @param {string} type Event type
-	 * @param {(event: EventListener.Event) => void} callback Event callback
-	 * @returns {EventListener.Listener} Event listener object
+	 * @param {(event: JLEvent) => void} callback Event callback
+	 * @returns {JLListener} Event listener object
 	 */
 	addEventListener(type, callback) {
-		var listener = new EventListener.Listener(type, callback);
-		this.listeners.push(listener);
+		// Create new listener instance
+		const listener = new EventListener.Listener(type, callback);
+
+		// Dispatch event for listener addition
+		this.dispatchEvent(EventListener.LISTENER_ADD_EVENT, {listener}, e => {
+			// Add listener to the list (create new list if it doesn't exist)		
+			if(!this.listenersMap.has(type)) this.listenersMap.set(type, [listener]);
+			else /**@type {JLListener[]}*/(this.listenersMap.get(type)).push(listener);
+		});
+
+		// Return newly created listener instance
 		return listener;
 	}
 
 	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Fires a specific event
+	 * @template {Record<string, any> | JLEvent} T
+	 * @template U
 	 * @param {string} type Event type
-	 * @param {Object<string, any> | EventListener.Event} [data={}] Custom event data
-	 * @param {(event: EventListener.Event) => T} [callback=null] Default action handler
-	 * @returns {Promise<T | undefined>} Returned value of the callback function
-	 * @template T
+	 * @param {T} [data={}] Custom event data
+	 * @param {(event: JLEvent & T) => U} [callback=null] Default action handler
+	 * @returns {Promise<U | undefined>} Returned value of the callback function
 	 */
-	async dispatchEvent(type, data = {}, callback = undefined) {
-		//Setup Event Object
+	async dispatchEvent(type, data, callback = undefined) {
+		// Setup the default event data
 		const defaultData = {
 			type: type,
 			time: new Date(),
 			defaultPreventable: !!callback
 		};
 
-		/** @type {EventListener.Event} */
+		/** @type {JLEvent & T} */
 		let eventObject;
 
-		//Add data to an object
+		// Add the user provided data to the event object
 		if(data instanceof EventListener.Event) {
-			//Assign Event Object
+			// Assign event object
 			eventObject = data;
 			eventObject.type = type;
 
-			//Add default data
+			// Add default data
 			for(const prop in defaultData) {
 				if(prop in eventObject) continue;
 				eventObject[prop] = defaultData[prop];
 			}
 		} else {
-			//Create new Event Object
-			eventObject = new EventListener.Event(defaultData, data);
+			// Create a new event object
+			eventObject = /**@type {JLEvent & T}*/(new EventListener.Event(defaultData, data || {}));
 		}
 
-		//Run all listener's callbacks
-		const promises = [];
+		// Get listeners for the type
+		const listeners = this.listenersMap.get(type);
 
-		for(var listener of this.listeners) {
-			if(eventObject.isStopped) break;
-			if(listener.type != type) continue;
+		// If there are no listeners for this type, call the callback right away
+		if(!listeners) return typeof callback === "function" ? callback(eventObject) : undefined;
 
-			eventObject.hasListener = true;
+		// Set the hasListener flag
+		eventObject.hasListener = true;
 
-			if(eventObject.async && !eventObject.parallel) await listener.callback(eventObject);
-			else promises.push(listener.callback(eventObject));
+		// Determine dispatch strategy
+		if(eventObject.async) {
+			if(eventObject.parallel) {
+				// Call all listeners in parallel
+				await Promise.all(listeners.map(listener => listener.callback(eventObject)));
+			} else {
+				// Call all listeners in series
+				for(const listener of listeners) {
+					if(eventObject.isStopped) break;
+					await listener.callback(eventObject);
+				}
+			}
+		} else {
+			// Call all listeners
+			for(const listener of listeners) {
+				if(eventObject.isStopped) break;
+				listener.callback(eventObject);
+			}
 		}
 
-		if(eventObject.async && eventObject.parallel) await Promise.all(promises);
+		// Call the default action handler if the event wasn't prevented
 		if(!eventObject.defaultPrevented && typeof callback === "function") return callback(eventObject);
-		else return undefined;
 	}
 
 	/**
 	 * Removes event handler
-	 * @param {EventListener.Listener} listener Event listener returned by EventListener.addEventListener()
+	 * @param {JLListener} listener Event listener returned by EventListener.addEventListener()
 	 * @returns {boolean} Returns true if listener was removed successfully
 	 */
 	removeEventListener(listener) {
-		for(var elm of this.listeners) {
-			if(elm != listener) continue;
-			this.listeners.splice(this.listeners.indexOf(listener), 1);
-			return true;
-		}
-		return false;
+		// Try to get listeners for the type
+		const listeners = this.listenersMap.get(listener.type);
+		if(!listeners) return false;
+
+		// Try to find the listener
+		const index = listeners.indexOf(listener);
+		if(index === -1) return false;
+
+		// Remove the listener
+		listeners.splice(index, 1);
+		return true;
+	}
+
+	/**
+	 * @param {string} type
+	 * @return {boolean} 
+	 * @memberof EventListener
+	 */
+	hasListeners(type) {
+		return this.listenersMap.has(type);
+	}
+
+	/**
+	 * @deprecated
+	 * @return {JLListener[]} 
+	 * @memberof EventListener
+	 */
+	get listeners() {
+		return Array.from(this.listenersMap.values()).flat();
 	}
 }
-EventListener.Event = class Event {
+EventListener.LISTENER_ADD_EVENT = /**@type {const}*/("__listenerAddEvent__");
+
+class JLEvent {
+	/**
+	 * Creates an instance of JLEvent.
+	 * @param {Object[]} data
+	 * @memberof JLEvent
+	 */
 	constructor(...data) {
-		this.type = undefined;
+		/** @type {string} */
+		this.type = "";
+		/** @type {Date} */
 		this.time = new Date();
+		/** @type {boolean} */
 		this.defaultPreventable = false;
+		/** @type {boolean} */
 		this.defaultPrevented = false;
+		/** @type {boolean} */
 		this.isStopped = false;
+		/** @type {boolean} */
 		this.hasListener = false;
+		/** @type {boolean} */
 		this.async = false;
+		/** @type {boolean} */
 		this.parallel = false;
 
-		//Add data to Event Object
+		// Add data to event object
 		let hasParallelOption = false;
 		for(const obj of data) {
-			if(typeof obj !== "object") throw new TypeError("Expected object instead got " + obj);
+			// Check for valid type
+			if(typeof obj !== "object") throw new TypeError(`Expected 'object' instead got '${obj}'`);
+
+			// Copy properties
 			for(const property in obj) {
 				this[property] = obj[property];
-				if(property == "parallel") hasParallelOption = true;
+				if(property === "parallel") hasParallelOption = true;
 			}
 		}
 
-		//In case there is no parallel option set, set it to `true` as default
+		// In case there is no parallel option set, set it to `true` as default
 		if(this.async && !hasParallelOption) this.parallel = true;
 	}
 
+	/**
+	 * @memberof JLEvent
+	 */
 	preventDefault() {
 		if(this.defaultPreventable) this.defaultPrevented = true;
-		else throw new Error("Event " + this.type + " is not default preventable!");
+		else throw new Error(`Event ${this.type} is not default preventable!`);
 	}
 
+	/**
+	 * @memberof JLEvent
+	 */
 	stopPropagation() {
 		this.isStopped = true;
 	}
 
+	/**
+	 * @memberof JLEvent
+	 */
 	reset() {
 		this.time = new Date();
 		this.defaultPrevented = false;
 		this.isStopped = false;
 		this.hasListener = false;
 	}
-};
-EventListener.Listener = class Listener {
+}
+EventListener.Event = JLEvent;
+
+class JLListener {
+	// eslint-disable-next-line valid-jsdoc
+	/**
+	 * Creates an instance of Listener.
+	 * @param {string} type
+	 * @param {(event: JLEvent) => (void | Promise<void>)} callback
+	 */
 	constructor(type, callback) {
+		/** @type {string} */
 		this.type = type;
+
+		/** @type {(event: JLEvent) => (void | Promise<void>)} */
 		this.callback = callback;
 	}
-};
+}
+EventListener.Listener = JLListener;
 
 class EventListenerStatic {
 	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Add event handler for specific event
 	 * @param {string} type Event type
-	 * @param {(event: EventListener.Event) => void} callback Event callback
-	 * @returns {EventListener.Listener} Event listener object
+	 * @param {(event: JLEvent) => void} callback Event callback
+	 * @returns {JLListener} Event listener object
 	 */
 	static addEventListener(type, callback) {
-		var listener = new EventListener.Listener(type, callback);
-		this.listeners.push(listener);
+		// Create new listener instance
+		const listener = new EventListener.Listener(type, callback);
+
+		// Dispatch event for listener addition
+		this.dispatchEvent(EventListener.LISTENER_ADD_EVENT, {listener}, e => {
+			// Statically create a new instance of listeners Map on each inheritted class
+			if(!this.listenersMap) this.listenersMap = new Map();
+
+			// Add listener to the list (create new list if it doesn't exist)		
+			if(!this.listenersMap.has(type)) this.listenersMap.set(type, [listener]);
+			else /**@type {JLListener[]}*/(this.listenersMap.get(type)).push(listener);
+		});
+
+		// Return newly created listener instance
 		return listener;
 	}
 
 	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Fires a specific event
+	 * @template {Record<string, any> | JLEvent} T
+	 * @template U
 	 * @param {string} type Event type
-	 * @param {Object<string, any> | EventListener.Event} [data={}] Custom event data
-	 * @param {(event: EventListener.Event) => T} [callback=null] Default action handler
-	 * @returns {Promise<T | undefined>} Returned value of the callback function
-	 * @template T
+	 * @param {T} [data={}] Custom event data
+	 * @param {(event: JLEvent & T) => U} [callback=null] Default action handler
+	 * @returns {Promise<U | undefined>} Returned value of the callback function
 	 */
-	static async dispatchEvent(type, data = {}, callback = undefined) {
-		//Setup Event Object
+	static async dispatchEvent(type, data, callback = undefined) {
+		// Setup the default event data
 		const defaultData = {
 			type: type,
 			time: new Date(),
 			defaultPreventable: !!callback
 		};
 
-		/** @type {EventListener.Event} */
+		/** @type {JLEvent & T} */
 		let eventObject;
 
-		//Add data to an object
+		// Add the user provided data to the event object
 		if(data instanceof EventListener.Event) {
-			//Assign Event Object
+			// Assign event object
 			eventObject = data;
 			eventObject.type = type;
 
-			//Add default data
+			// Add default data
 			for(const prop in defaultData) {
 				if(prop in eventObject) continue;
 				eventObject[prop] = defaultData[prop];
 			}
 		} else {
-			//Create new Event Object
-			eventObject = new EventListener.Event(defaultData, data);
+			// Create a new event object
+			eventObject = /**@type {JLEvent & T}*/(new EventListener.Event(defaultData, data || {}));
 		}
 
-		//Run all listener's callbacks
-		const promises = [];
+		// Get listeners for the type
+		const listeners = this.listenersMap && this.listenersMap.get(type);
 
-		for(var listener of this.listeners) {
-			if(eventObject.isStopped) break;
-			if(listener.type != type) continue;
+		// If there are no listeners for this type, call the callback right away
+		if(!listeners) return typeof callback === "function" ? callback(eventObject) : undefined;
 
-			eventObject.hasListener = true;
+		// Set the hasListener flag
+		eventObject.hasListener = true;
 
-			if(eventObject.async && !eventObject.parallel) await listener.callback(eventObject);
-			else promises.push(listener.callback(eventObject));
+		// Determine dispatch strategy
+		if(eventObject.async) {
+			if(eventObject.parallel) {
+				// Call all listeners in parallel
+				await Promise.all(listeners.map(listener => listener.callback(eventObject)));
+			} else {
+				// Call all listeners in series
+				for(const listener of listeners) {
+					if(eventObject.isStopped) break;
+					await listener.callback(eventObject);
+				}
+			}
+		} else {
+			// Call all listeners
+			for(const listener of listeners) {
+				if(eventObject.isStopped) break;
+				listener.callback(eventObject);
+			}
 		}
 
-		if(eventObject.async && eventObject.parallel) await Promise.all(promises);
+		// Call the default action handler if the event wasn't prevented
 		if(!eventObject.defaultPrevented && typeof callback === "function") return callback(eventObject);
-		else return undefined;
 	}
 
 	/**
 	 * Removes event handler
-	 * @param {EventListener.Listener} listener Event listener returned by EventListener.addEventListener()
+	 * @param {JLListener} listener Event listener returned by EventListener.addEventListener()
 	 * @returns {boolean} Returns true if listener was removed successfully
 	 */
 	static removeEventListener(listener) {
-		for(var elm of this.listeners) {
-			if(elm != listener) continue;
-			this.listeners.splice(this.listeners.indexOf(listener), 1);
-			return true;
-		}
-		return false;
+		// Try to get listeners for the type
+		const listeners = this.listenersMap && this.listenersMap.get(listener.type);
+		if(!listeners) return false;
+
+		// Try to find the listener
+		const index = listeners.indexOf(listener);
+		if(index === -1) return false;
+
+		// Remove the listener
+		listeners.splice(index, 1);
+		return true;
+	}
+
+	/**
+	 * @param {string} type
+	 * @return {boolean} 
+	 * @memberof EventListener
+	 */
+	static hasListeners(type) {
+		if(!this.listenersMap) return false;
+		return this.listenersMap.has(type);
+	}
+
+	/**
+	 * @deprecated
+	 * @return {JLListener[]} 
+	 * @memberof EventListener
+	 */
+	static get listeners() {
+		if(!this.listenersMap) return [];
+		return Array.from(this.listenersMap.values()).flat();
 	}
 }
-EventListenerStatic.listeners = [];
 
 /**
- * @alias EventListenerStatic.addEventListener
+ * This is a static property on base class, do not access it directly!
+ * @type {Map<string, JLListener[]>}
  */
-EventListenerStatic.on = EventListenerStatic.addEventListener;
+EventListenerStatic.listenersMap = new Map();
+
+/**
+ * @type {
+	((type: string, callback: (event: JLEvent) => void) => JLListener) &
+	((type: "__listenerAddEvent__", callback: (event: JLEvent & {listener: JLListener}) => void) => JLListener)
+   }
+ * @alias EventListener.addEventListener
+ */
+EventListenerStatic.on = /**@type {any}*/(EventListenerStatic.addEventListener);
 
 /**
  * Seedable random number generator.
@@ -3756,6 +3914,8 @@ if(typeof module !== "undefined") {
 		Dimensions,
 		EventListener,
 		EventListenerStatic,
+		JLEvent,
+		JLListener,
 		Matrix,
 		RandomGenerator,
 		DropArea,
