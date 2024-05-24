@@ -3628,41 +3628,58 @@ class DropArea extends EventListener {
 	}
 }
 
+// eslint-disable-next-line valid-jsdoc
+/**
+ * @deprecated
+ * @param {((value: number) => void) | string} output
+ * @param {number} [min=0]
+ * @param {number} [max=100]
+ * @param {number} [step=1]
+ * @param {number} [value=(min + max) / 2]
+ * @param {string | HTMLElement} [elm=JL("body", 0)]
+ * @param {string} [cls="slider"]
+ */
 function createSlider(
 	output,
 	min = 0,
 	max = 100,
 	step = 1,
 	value = (min + max) / 2,
-	elm = get("body"),
+	elm = JL("body", 0),
 	cls = "slider"
 ) {
-	var isSelector = typeof elm === "string";
-	var node = isSelector ? get(elm) : document.createElement("input");
-	var label = document.createElement("span");
-	console.log(node, elm);
+	const isSelector = typeof elm === "string";
+
+	const node = /**@type {HTMLInputElement}*/(isSelector ? JL(elm, 0) : document.createElement("input"));
 	node.type = "range";
-	node.min = min;
-	node.max = max;
-	node.step = step;
-	node.value = value;
+	node.min = min + "";
+	node.max = max + "";
+	node.step = step + "";
+	node.value = value + "";
 	node.className = isSelector ? "" : cls;
-	label.innerText = value;
+
+	const label = document.createElement("span");
+	label.innerText = value + "";
 	label.className = "sliderLabel_" + cls;
+
 	if(!isSelector) {
 		elm.appendChild(node);
-		//elm.appendChild(document.createElement("br"));
 	}
-	(isSelector ? node.parentNode : elm).appendChild(label);
-	var call = function() {
+
+	const container = (isSelector ? node.parentNode : elm);
+	if(container) container.appendChild(label);
+
+	const call = () => {
 		label.innerText = node.value;
+
 		if(typeof output === "string") eval(output + "=" + node.value);
 		else if(typeof output === "function") output(+node.value);
-		else throw new Error("[JustLib] Slider: Unknown output");
+
+		throw new Error("[JustLib] Slider: Unknown output");
 	};
+
 	node.addEventListener("change", call);
 	node.addEventListener("input", call);
-	return true;
 }
 
 function createWindow(url, title, options = {}, center = false) {
@@ -3688,7 +3705,7 @@ function createWindow(url, title, options = {}, center = false) {
 			.slice(0, -1)
 	);
 
-	if(window.focus && win) win.focus();
+	if(win) win.focus();
 
 	return win;
 }
