@@ -115,11 +115,11 @@ function hasClass(elm, cls) {
  * @returns {boolean}
  */
 function toggleClass(elm, cls, state = undefined) {
-	if(typeof elm === "undefined" || !(elm instanceof HTMLElement)) return false; //throw new TypeError(elm + " is not valid HTML element");
+	if(typeof elm === "undefined" || !(elm instanceof HTMLElement)) return false; // throw new TypeError(elm + " is not valid HTML element");
 	if((hasClass(elm, cls) && state == true) || (!hasClass(elm, cls) && state == false)) return state;
 	if(elm.classList) elm.classList.toggle(cls);
 	else {
-		//IE fix
+		// IE fix
 		var classes = elm.className.split(" ");
 		var i = classes.indexOf(cls);
 
@@ -584,10 +584,10 @@ function setCursorPos(elm, position) {
 function getDevice(mobile = 370, tablet = 768) {
 	var w = window.innerWidth;
 	if(w <= mobile) return 2;
-	//Mobile
+	// Mobile
 	else if(w <= tablet) return 1;
-	//Tablet
-	else return 0; //Desktop
+	// Tablet
+	else return 0; // Desktop
 }
 
 function setCookie(cname, cvalue, exdays = 0) {
@@ -647,7 +647,7 @@ function random(min, max = undefined, round = true) {
 function randomGaussian(min, max, skew = 1) {
 	let u = 0,
 		v = 0;
-	while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+	while(u === 0) u = Math.random(); // Converting [0,1) to (0,1)
 	while(v === 0) v = Math.random();
 	let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 
@@ -704,7 +704,7 @@ function hexa2rgba(b) {
  */
 function parseColor(color) {
 	if(color.startsWith("#")) {
-		//Hexadecimal
+		// Hexadecimal
 		color = hexa2rgba((color + "00").slice(0, 9));
 	}
 	var ch = color.split(",").map(elm => {
@@ -837,8 +837,8 @@ function iterate(iterable) {
  * @param {[A[]?, B[]?, C[]?, D[]?, E[]?]} iterables
  * @returns {[A[number], B[number], C[number], D[number], E[number]][]} Iterator
  * @example
- * zip(["John", "Charles", "Mike"], ["Jenny", "Christy", "Monica"]); //[["John", "Jenny"], ["Charles", "Christy"], ["Mike", "Monica"]]
- * zip([1, "a"], [2, "b"], [3]) //[1, 2, 3] -> "c" is missing
+ * zip(["John", "Charles", "Mike"], ["Jenny", "Christy", "Monica"]); // [["John", "Jenny"], ["Charles", "Christy"], ["Mike", "Monica"]]
+ * zip([1, "a"], [2, "b"], [3]) // [1, 2, 3] -> "c" is missing
  */
 function zip(...iterables) {
 	const iterator = /** @type {any} */([]);
@@ -1003,9 +1003,9 @@ function Highlight(str, {
 		"(?:^|[^a-zA-Z0-9_$])(?:\\+|-)?((?:0(?:[xX][0-9a-fA-F]+|[oO][0-7]+|[bB][0-1]+)|(?:\\d+\\.|\\.)?\\d+)(?:e(?:\\+|-)?\\d+)?)": "NUMBER",
 		"[{,]\\s*([\"'\\`](?:[^\"'\\`\\\\]|\\\\.)*[\"'\\`]):": "VARIABLE",
 		"(\".*?\"(?<!\\\\\")|'.*?'(?<!\\\\'))": "STRING",
-		/*"(?:`|})((?:.|\\n)*?)(?:`|\\${)(?<!\\\\`)": "#ffe484", //broken*/
+		/*"(?:`|})((?:.|\\n)*?)(?:`|\\${)(?<!\\\\`)": "#ffe484", // broken*/
 		/*"(`)": "#ffe484",*/
-		"(`(?:.|\\n|\\r\\n)*?`)(?<!\\\\`)": "STRING", //`
+		"(`(?:.|\\n|\\r\\n)*?`)(?<!\\\\`)": "STRING", // `
 		"(?:`|}).*?(\\${)": "TEMPLATE_CODE",
 		"(}).*?(?:`|\\${)": "TEMPLATE_CODE",
 		"(?:new|class)\\s+([^0-9]\\w+)": "NAME",
@@ -1034,7 +1034,7 @@ function Highlight(str, {
 	str = str.replace(/(>)/g, "&gt;");
 	str = str.replace(/(<)/g, "&lt;");
 
-	//console.log(str);
+	// console.log(str);
 
 	try {
 
@@ -1053,11 +1053,11 @@ function Highlight(str, {
 			var regexp = new RegExp(regex, "gm");
 			if(debug) console.log(regexp);
 
-			//console.log(regexp, str);
-			//console.log(regexp.test(str));
+			// console.log(regexp, str);
+			// console.log(regexp.test(str));
 
 			str.replace(regexp, (match, ...groups) => {
-				//if(match.match(/(&gt;|&lt;)/)) return;
+				// if(match.match(/(&gt;|&lt;)/)) return;
 
 				if(debug) console.log(match);
 
@@ -1094,7 +1094,7 @@ function Highlight(str, {
 			var end = position[2];
 
 			if(start < End) {
-				//console.log(true);
+				// console.log(true);
 				continue;
 			}
 
@@ -1110,9 +1110,9 @@ function Highlight(str, {
 
 			var pos1 = text0.length + end + offset;
 
-			//var sub = text0 + str.substring(pos0, pos1) + text1;
+			// var sub = text0 + str.substring(pos0, pos1) + text1;
 
-			//str = str.slice(0, pos0 - text0.length) + sub + str.slice(pos1 + text1.length);
+			// str = str.slice(0, pos0 - text0.length) + sub + str.slice(pos1 + text1.length);
 
 			str = str.slice(0, pos0) + text0 + str.slice(pos0);
 			str = str.slice(0, pos1) + text1 + str.slice(pos1);
@@ -1120,14 +1120,14 @@ function Highlight(str, {
 			offset += text0.length + text1.length;
 		}
 
-		//console.log(str);
-		//console.log(str.match(/(<span style=".*?">)((?:.|\r\n)*?)(<\/span>)/gmi));
+		// console.log(str);
+		// console.log(str.match(/(<span style=".*?">)((?:.|\r\n)*?)(<\/span>)/gmi));
 		str = str.replace(/(<span style=".*?">)((?:.|\r\n)*?)(<\/span>)/gim, (match, text0, sub, text1) => {
 			if(sub.indexOf("\n") == -1) return match;
 
-			//console.log(sub);
+			// console.log(sub);
 			sub = sub.replace(/\n/gm, `${text1}\n${text0}`);
-			//console.log(sub);
+			// console.log(sub);
 
 			return text0 + sub + text1;
 		});
@@ -1135,11 +1135,11 @@ function Highlight(str, {
 	} catch(e) {
 		if(onerror) onerror(e, originalString);
 		failed = true;
-		//return originalString;
-		//throw "Update your browser!";
+		// return originalString;
+		// throw "Update your browser!";
 	}
 
-	//console.log(str);
+	// console.log(str);
 
 	const TAB = range(tabSize).reduce(prev => prev + "&nbsp;", "");
 	const INDENT = "<span class=\"highlight-indent\"></span>";
@@ -1147,8 +1147,8 @@ function Highlight(str, {
 
 	str = str.replace(/\t/g, TAB/*"&nbsp;&nbsp;&nbsp;&nbsp;"*/);
 	str = str.replace(/  /g, "&nbsp;&nbsp;");
-	//str = str.replace(/ {2}/g, "&nbsp;&nbsp;");
-	//str = str.replace(/\n/g, "&nbsp;&nbsp;");
+	// str = str.replace(/ {2}/g, "&nbsp;&nbsp;");
+	// str = str.replace(/\n/g, "&nbsp;&nbsp;");
 
 	var tabRegex = new RegExp("((&nbsp;){" + tabSize + "})", "g");
 	var indentRegex = new RegExp("(<pre>|&nbsp;)((&nbsp;){" + tabSize + "})", "g");
@@ -1157,16 +1157,16 @@ function Highlight(str, {
 	for(var i = 0; i < lines.length; i++) {
 		if(!lines[i].length || !(lines[i].length == 1 && lines[i] == "\r")) continue;
 		var tabs = "";
-		//console.log(i, ((lines[i - 1] || "").match(tabRegex) || "").length, lines[i]);
-		for(var j = 0; j < ((lines[i - 1] || "").match(tabRegex) || "").length; j++) tabs += TAB;//"&nbsp;&nbsp;&nbsp;&nbsp;";
+		// console.log(i, ((lines[i - 1] || "").match(tabRegex) || "").length, lines[i]);
+		for(var j = 0; j < ((lines[i - 1] || "").match(tabRegex) || "").length; j++) tabs += TAB;// "&nbsp;&nbsp;&nbsp;&nbsp;";
 		lines[i] = tabs;
 		if(debug) console.log(i, lines[i]);
 	}
 	str = lines.join("\n");
 
-	//str = str.replace(/(&nbsp;{4})/g, '$1<a style="border-left:1px solid grey"></a>');
+	// str = str.replace(/(&nbsp;{4})/g, '$1<a style="border-left:1px solid grey"></a>');
 
-	//str = str.replace(/(\r\n|\n|\r)/g, "<br>");
+	// str = str.replace(/(\r\n|\n|\r)/g, "<br>");
 	var lines = str.split("\n");
 
 	for(var i = 0; i < lines.length; i++) {
@@ -1175,8 +1175,8 @@ function Highlight(str, {
 
 		if(indentLines) {
 			if(debug) console.log(lines[i]);
-			//var tabs = (lines[i].match(/<pre>(&nbsp;)*/) || [""])[0].split(/&nbsp;/).length - 1;
-			//lines[i] = lines[i].replace(indentRegex, '$1<span style="border-left:1px solid #505050;position:absolute;height: 19px;"></span>$2');
+			// var tabs = (lines[i].match(/<pre>(&nbsp;)*/) || [""])[0].split(/&nbsp;/).length - 1;
+			// lines[i] = lines[i].replace(indentRegex, '$1<span style="border-left:1px solid #505050;position:absolute;height: 19px;"></span>$2');
 			lines[i] = lines[i].replace(/(<pre.*?>|<span style=".*?">)((?:&nbsp;)+|<br>)/, (match, before, tabs) => {
 				const isEmptyLine = tabs == BR;
 				let len = 0;
@@ -1190,13 +1190,13 @@ function Highlight(str, {
 				const indent = (INDENT + TAB).repeat(len / tabSize);
 				const remain = "&nbsp;".repeat(len % tabSize);
 				const newLine = isEmptyLine && len == 0 ? BR : "";
-				//var indent = range(0, len - len % tabSize, tabSize).reduce(prev => prev + INDENT + TAB, "");
-				//var remain = range(len % tabSize).reduce(prev => prev + "&nbsp;", "");
+				// var indent = range(0, len - len % tabSize, tabSize).reduce(prev => prev + INDENT + TAB, "");
+				// var remain = range(len % tabSize).reduce(prev => prev + "&nbsp;", "");
 
 				return before + indent + remain + newLine;
 			});
 			if(debug) console.log(lines[i]);
-			//((&nbsp;){4})(?=<pre>|&nbsp;)
+			// ((&nbsp;){4})(?=<pre>|&nbsp;)
 		}
 	}
 
@@ -1504,18 +1504,18 @@ class Matrix {
 	inverse() {
 		if(this.rows != this.cols) return undefined;
 
-		//First create an identity matrix of the same size
+		// First create an identity matrix of the same size
 		const identity = Matrix.identity(this.rows);
 
-		//Create a copy of the matrix
+		// Create a copy of the matrix
 		const mat = this.copy();
 
-		//Loop over the matrix
+		// Loop over the matrix
 		for(let i = 0; i < this.rows; i++) {
-			//Find the pivot element
+			// Find the pivot element
 			let pivot = mat.matrix[i][i];
 
-			//If pivot is zero, swap the row with a row below it
+			// If pivot is zero, swap the row with a row below it
 			if(pivot == 0) {
 				for(let j = i + 1; j < this.rows; j++) {
 					if(mat.matrix[j][i] != 0) {
@@ -1526,23 +1526,23 @@ class Matrix {
 				}
 			}
 
-			//If pivot is still zero, then the matrix is singular
+			// If pivot is still zero, then the matrix is singular
 			if(pivot == 0) {
 				throw new Error("Cannot inverse singular matrix!");
 			}
 
-			//Normalize the pivot row
+			// Normalize the pivot row
 			for(let j = 0; j < this.cols; j++) {
 				mat.matrix[i][j] /= pivot;
 				identity.matrix[i][j] /= pivot;
 			}
 
-			//Loop over the rows
+			// Loop over the rows
 			for(let j = 0; j < this.rows; j++) {
-				//If the row is the pivot row, skip it
+				// If the row is the pivot row, skip it
 				if(j == i) continue;
 
-				//If the row is not the pivot row, subtract the pivot row
+				// If the row is not the pivot row, subtract the pivot row
 				const factor = mat.matrix[j][i];
 				for(let k = 0; k < this.cols; k++) {
 					mat.matrix[j][k] -= factor * mat.matrix[i][k];
@@ -2319,7 +2319,7 @@ class Dimensions {
 			this.h += n.y;
 			this.d += n.z;
 
-			//Only compute the magnitdue if the radius is not 0 to save some performance.
+			// Only compute the magnitdue if the radius is not 0 to save some performance.
 			if(this.r) this.r += n.mag();
 		}
 
@@ -2343,7 +2343,7 @@ class Dimensions {
 			this.h -= n.y;
 			this.d -= n.z;
 
-			//Only compute the magnitdue if the radius is not 0 to save some performance.
+			// Only compute the magnitdue if the radius is not 0 to save some performance.
 			if(this.r) this.r -= n.mag();
 		}
 
@@ -2367,7 +2367,7 @@ class Dimensions {
 			this.h *= n.y;
 			this.d *= n.z;
 
-			//Only compute the magnitdue if the radius is not 0 to save some performance.
+			// Only compute the magnitdue if the radius is not 0 to save some performance.
 			if(this.r) this.r *= n.mag();
 		}
 
@@ -2391,7 +2391,7 @@ class Dimensions {
 			this.h *= n.y;
 			this.d *= n.z;
 
-			//Only compute the magnitdue if the radius is not 0 to save some performance.
+			// Only compute the magnitdue if the radius is not 0 to save some performance.
 			if(this.r) this.r *= n.mag();
 		}
 
@@ -2462,13 +2462,13 @@ class Color {
 		this.a = 1;
 
 		if(red instanceof Color) {
-			//Copy
+			// Copy
 			this.r = +red.r;
 			this.g = +red.g;
 			this.b = +red.b;
 			this.a = +red.a;
 		} else if(isNaN(red) && typeof red === "string") {
-			//Parse
+			// Parse
 			var color = Color.parse(red);
 
 			this.r = color.r;
@@ -2476,7 +2476,7 @@ class Color {
 			this.b = color.b;
 			this.a = color.a;
 		} else {
-			//Create new
+			// Create new
 			this.r = +red;
 			this.g = typeof green === "undefined" ? +red : +green;
 			this.b = typeof blue === "undefined" ? +red : +blue;
@@ -2610,20 +2610,20 @@ class Color {
 	static parse(string) {
 		var color = string.toString().toLowerCase();
 
-		//HEX
+		// HEX
 		if(color.startsWith("#")) {
 			const components = color.slice(1).split("");
 
-			//Add alpha channel
+			// Add alpha channel
 			if(components.length == 3) components.push("f");
 			else if(components.length == 6) components.push("f", "f");
 
-			//Convert to RRGGBBAA
+			// Convert to RRGGBBAA
 			if(components.length == 4) {
 				for(var i = 0; i < 8; i += 2) components.splice(i, 0, components[i]);
 			}
 
-			//Convert to RGBA
+			// Convert to RGBA
 			if(components.length == 8) {
 				var c = [];
 				for(var i = 2; i <= 8; i += 2) c.push(parseInt("0x" + components.slice(i - 2, i).join("")));
@@ -2631,7 +2631,7 @@ class Color {
 				return new Color(c[0], c[1], c[2], c[3] / 255);
 			} else throw new TypeError(string + " is not a valid HEX color");
 		} else if(color.startsWith("rgb")) {
-			//RGB
+			// RGB
 			var match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)/);
 
 			if(match) {
@@ -2645,7 +2645,7 @@ class Color {
 				return new Color(r, g, b, a);
 			} else throw new TypeError(string + " is not a valid RGBA format");
 		} else if(color.startsWith("hsl")) {
-			//HSL
+			// HSL
 			var match = color.match(/hsla?\((\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)(%?),\s*(\d+(?:\.\d+)?)(%?)(?:,\s*(\d+(?:\.\d+)?))?\)/);
 
 			if(match) {
@@ -2668,7 +2668,7 @@ class Color {
 					else return 0;
 				};
 
-				//Hue
+				// Hue
 				for(var i = 0; i < 6; i++) {
 					var min = i * 60;
 					var max = (i + 1) * 60;
@@ -2682,8 +2682,8 @@ class Color {
 				}
 
 				return new Color(r, g, b, a)
-					.map(e => map(s, 0, 1, 128, e)) //Saturation
-					.map(e => map(l, 0.5, l > 0.5 ? 1 : 0, e, l > 0.5 ? 255 : 0)) //Lightness
+					.map(e => map(s, 0, 1, 128, e)) // Saturation
+					.map(e => map(l, 0.5, l > 0.5 ? 1 : 0, e, l > 0.5 ? 255 : 0)) // Lightness
 					.map(e => Math.round(e));
 			} else throw new TypeError(string + " is not a valid HSLA format");
 		} else throw new TypeError(string + " is not a valid color type");
@@ -2728,10 +2728,10 @@ class Color {
 	 * @param {number} blue Blue component of color
 	 * @returns {Color} Random color
 	 * @example
-	 * //returns random colors from 128 to 255
+	 * // returns random colors from 128 to 255
 	 * Color.random(128, 128, 128);
 	 * @example
-	 * //returns random colors from 0 to 128
+	 * // returns random colors from 0 to 128
 	 * Color.random(-128, -128, -128);
 	 */
 	static random(red = 0, green = red, blue = green) {
@@ -2789,15 +2789,15 @@ class ComplexNumber {
 				u = u_s;
 			}
 		} else if(input instanceof Array) {
-			//Convert to strings for safety
+			// Convert to strings for safety
 			const r_s = input[0] + "";
 			const i_s = input[1] + "";
 
-			//Parse and precache strings into numbers
+			// Parse and precache strings into numbers
 			const r_n = parseFloat(r_s);
 			const i_n = parseFloat(i_s);
 
-			//Check for invalid numbers
+			// Check for invalid numbers
 			if(isNaN(r_n)) throw new TypeError(`Invalid real part '${r_s}' of complex number '${input.join(", ")}'`);
 			if(isNaN(i_n)) throw new TypeError(`Invalid imaginary part '${i_s}' of complex number '${input.join(", ")}'`);
 			if(unit.length !== 1 || !unit.match(/[a-z]/i)) throw new TypeError(`Invalid imaginary unit '${unit}'`);
@@ -2999,7 +2999,7 @@ class ComplexNumber {
 		if(round < -1) throw new RangeError("round must be a positive integer or -1");
 		const SP = spacing ? " " : "";
 
-		//Helper function to format real numbers
+		// Helper function to format real numbers
 		const formatRealNumber = (/**@type {number}*/_number, _sign = sign, _spacing = spacing) => {
 			let str = "";
 
@@ -3020,7 +3020,7 @@ class ComplexNumber {
 			return _round == -1 ? _number : _number.toFixed(_round);
 		};
 
-		//Format the complex number
+		// Format the complex number
 		if(form == "a") {
 			const real = formatRealNumber(number.r, false, false);
 			const imaginary = formatRealNumber(number.i, true);
@@ -3776,16 +3776,16 @@ try {
 		 * @param {any} initialValue  If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of value of the first key-value pair in the object.
 		 * @return {any} Accumulated result.
 		 * @example
-		 * //Sum of all values in object
-		 * var object = {apples: 14, oranges: 8, bananas: 23};	//Our object
-		 * object.reduce((prev, curr) => prev + curr.value);	//45
+		 * // Sum of all values in object
+		 * var object = {apples: 14, oranges: 8, bananas: 23};	// Our object
+		 * object.reduce((prev, curr) => prev + curr.value);	// 45
 		 * @example
-		 * //Parse object as URL query string
-		 * var object = {apples: 14, oranges: 8, bananas: 23};	//Our object
-		 * object.reduce((prev, {key, value}, i) => {	//We can use object deconstruction for key-value pair
-		 * 	var curr = `${i ? "&" : ""}${key}=${value}`;	//If the call is first, don't put "&" at start (we put there "?")
-		 * 	return prev + curr;	//Return new string
-		 * }, "?");	//Start with "?"
+		 * // Parse object as URL query string
+		 * var object = {apples: 14, oranges: 8, bananas: 23};	// Our object
+		 * object.reduce((prev, {key, value}, i) => {	// We can use object deconstruction for key-value pair
+		 * 	var curr = `${i ? "&" : ""}${key}=${value}`;	// If the call is first, don't put "&" at start (we put there "?")
+		 * 	return prev + curr;	// Return new string
+		 * }, "?");	// Start with "?"
 		 */
 		value: function(callbackfn, initialValue = Object.values(this)[0]) {
 			var keys = Object.keys(this);
@@ -3829,15 +3829,15 @@ try {
 		 * @param {any} [initialValue]  If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of value of the first key-value pair in the object.
 		 * @return {any} Accumulated result.
 		 * @example
-		 * //Sum of all values in object
-		 * const object = {apples: 14, oranges: 8, bananas: 23};	//Our object
-		 * Object.reduce(object, (prev, [key, value]) => prev + value);	//45
+		 * // Sum of all values in object
+		 * const object = {apples: 14, oranges: 8, bananas: 23};	// Our object
+		 * Object.reduce(object, (prev, [key, value]) => prev + value);	// 45
 		 * @example
-		 * //Parse object as URL query string
-		 * const object = {apples: 14, oranges: 8, bananas: 23};  //Our object
-		 * Object.reduce(object, (prev, [key, value], i) => {   //We can use object destruction for key-value pair
-		 * 	return prev + `${i ? "&" : ""}${key}=${value}`;	//If the call is first, don't put "?" at start (we put there "&")
-		 * }, "?");	//Start with "?"
+		 * // Parse object as URL query string
+		 * const object = {apples: 14, oranges: 8, bananas: 23};  // Our object
+		 * Object.reduce(object, (prev, [key, value], i) => {   // We can use object destruction for key-value pair
+		 * 	return prev + `${i ? "&" : ""}${key}=${value}`;	// If the call is first, don't put "?" at start (we put there "&")
+		 * }, "?");	// Start with "?"
 		 */
 		value: function(o, callbackfn, initialValue = Object.values(o)[0]) {
 			const keys = Object.keys(o);
