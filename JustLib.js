@@ -4021,6 +4021,7 @@ if(typeof module !== "undefined") {
 		getElementDimensions,
 		cloneElement,
 		isElementInView,
+		isElementVisible,
 		getScrollTop,
 		enterFullscreen,
 		isFullscreen,
