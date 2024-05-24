@@ -6,7 +6,7 @@
  * File Created: 2019-06-14T18:18:58+02:00
  * Last Modified: 2022-12-12T16:41:28+01:00
  * 
- * Copyright (c) 2019 - 2023 Jaroslav Louma
+ * Copyright (c) 2019 - 2024 Jaroslav Louma
  */
 
 // @ts-check
@@ -1104,7 +1104,8 @@ function Highlight(str, {
 			var code = str;
 			var pos0 = start + offset;
 
-			var text0 = `<span style="color: var(--${color})">`;
+			// var text0 = `<span style="color: var(--${color})">`;
+			var text0 = `<span style="color: ${HIGHLIGHTER[color]}">`;
 			var text1 = "</span>";
 
 			var pos1 = text0.length + end + offset;
@@ -1217,7 +1218,7 @@ function Highlight(str, {
 		white-space: nowrap;
 		overflow: auto;
 		cursor: default;
-		background-color: var(--BACKGROUND);
+		background-color: ${HIGHLIGHTER["BACKGROUND"]};
 	}
 	.highlight-main .highlight-line {
 		width: 30px;
@@ -3046,18 +3047,26 @@ class ComplexNumber {
 		const DIGITS = String.raw`([0-9.]+)`;
 		const SIGN = String.raw`([+-])`;
 		const IDENTIFIER = String.raw`([a-z])`;
+		const WH = String.raw`\s*`;
 
 		const syntax = [
-				 /*1*/`${SIGN}?${DIGITS}${SIGN}${DIGITS}${IDENTIFIER}`, // a+bi
-				 /*6*/`${SIGN}?${DIGITS}${SIGN}${IDENTIFIER}${DIGITS}`, // a+ib
-				/*11*/`${SIGN}?${DIGITS}${IDENTIFIER}${SIGN}${DIGITS}`, // bi+a
-				/*16*/`${SIGN}?${IDENTIFIER}${DIGITS}${SIGN}${DIGITS}`, // ib+a
-				/*21*/`${SIGN}?${DIGITS}`, 								// a
-				/*23*/`${SIGN}?${DIGITS}${IDENTIFIER}`, 				// bi
-				/*26*/`${SIGN}?${IDENTIFIER}${DIGITS}` 					// ib
+				 /*1*/[`${SIGN}?`, DIGITS, SIGN, DIGITS, IDENTIFIER], // a+bi
+				 /*6*/[`${SIGN}?`, DIGITS, SIGN, IDENTIFIER, DIGITS], // a+ib
+				/*11*/[`${SIGN}?`, DIGITS, IDENTIFIER, SIGN, DIGITS], // bi+a
+				/*16*/[`${SIGN}?`, IDENTIFIER, DIGITS, SIGN, DIGITS], // ib+a
+				/*21*/[`${SIGN}?`, DIGITS],                           // a
+				/*23*/[`${SIGN}?`, DIGITS, IDENTIFIER],               // bi
+				/*26*/[`${SIGN}?`, IDENTIFIER, DIGITS]                // ib
+			//  /*1*/`${SIGN}?${DIGITS}${SIGN}${DIGITS}${IDENTIFIER}`, // a+bi
+			//  /*6*/`${SIGN}?${DIGITS}${SIGN}${IDENTIFIER}${DIGITS}`, // a+ib
+			// /*11*/`${SIGN}?${DIGITS}${IDENTIFIER}${SIGN}${DIGITS}`, // bi+a
+			// /*16*/`${SIGN}?${IDENTIFIER}${DIGITS}${SIGN}${DIGITS}`, // ib+a
+			// /*21*/`${SIGN}?${DIGITS}`, 								// a
+			// /*23*/`${SIGN}?${DIGITS}${IDENTIFIER}`, 				// bi
+			// /*26*/`${SIGN}?${IDENTIFIER}${DIGITS}` 					// ib
 		];
 
-		return this.__parseRegex = new RegExp(`^(?:${syntax.join("|")})$`, "mi");
+		return this.__parseRegex = new RegExp(`^(?:${WH}${syntax.map(e => e.join(WH)).join("|")})${WH}$`, "mi");
 	}
 }
 
