@@ -715,15 +715,54 @@ function getFormattedSize(s) {
 }
 
 /**
+ * @typedef {Object} TimeFormatterOptions
+ * @prop {boolean} [detailed=false] Switches between detailed and simplified output (e.g. "5h" if `false`, "5h 2m 3s" if `true`)
+ * @prop {boolean} [short=true] Switches between short and long units (e.g. "5h" if `true`, "5 hours" if `false`)
+ * @prop {number} [precision=2] Number of decimal places in non-detialed mode
+ */
+
+/**
  * Returns shortened time with units.
  * @param {number} t Time in milliseconds.
+ * @param {TimeFormatterOptions} [options={}] Options
  * @returns {string}
  */
-function getFormattedTime(t) {
-	if(t < 1000) return t + "ms";
-	else if(t < 60000) return (t / 1000).toFixed(2) + "s";
-	else if(t < 3600000) return (t / 60000).toFixed(2) + "m";
-	else return (t / 3600000).toFixed(2) + "h";
+function getFormattedTime(t, options = {}) {
+	const {
+		detailed = false,
+		short = true,
+		precision = 2
+	} = options || {};
+
+	const u_ms = short ? "ms" : " milliseconds";
+	const u_s = short ? "s" : " seconds" + (detailed ? "," : "");
+	const u_m = short ? "m" : " minutes" + (detailed ? "," : "");
+	const u_h = short ? "h" : " hours" + (detailed ? "," : "");
+	const u_d = short ? "d" : " days" + (detailed ? "," : "");
+	const u_w = short ? "w" : " weeks" + (detailed ? "," : "");
+
+	const v_ms = detailed ? (t % 1000) : t;
+	const v_s = detailed ? Math.floor(t / 1000) % 60 : t / 1000;
+	const v_m = detailed ? Math.floor(t / 60000) % 60 : t / 60000;
+	const v_h = detailed ? Math.floor(t / 3600000) % 24 : t / 3600000;
+	const v_d = detailed ? Math.floor(t / 86400000) % 7 : t / 86400000;
+	const v_w = detailed ? Math.floor(t / 604800000) : t / 604800000;
+
+	if(detailed) {
+		if(v_w >= 1) return `${v_w}${u_w} ${v_d}${u_d} ${v_h}${u_h} ${v_m}${u_m} ${v_s}${u_s} ${v_ms}${u_ms}`;
+		if(v_d >= 1) return `${v_d}${u_d} ${v_h}${u_h} ${v_m}${u_m} ${v_s}${u_s} ${v_ms}${u_ms}`;
+		if(v_h >= 1) return `${v_h}${u_h} ${v_m}${u_m} ${v_s}${u_s} ${v_ms}${u_ms}`;
+		if(v_m >= 1) return `${v_m}${u_m} ${v_s}${u_s} ${v_ms}${u_ms}`;
+		if(v_s >= 1) return `${v_s}${u_s} ${v_ms}${u_ms}`;
+		return `${v_ms}${u_ms}`;
+	} else {
+		if(v_w >= 1) return `${v_w.toFixed(precision)}${u_w}`;
+		if(v_d >= 1) return `${v_d.toFixed(precision)}${u_d}`;
+		if(v_h >= 1) return `${v_h.toFixed(precision)}${u_h}`;
+		if(v_m >= 1) return `${v_m.toFixed(precision)}${u_m}`;
+		if(v_s >= 1) return `${v_s.toFixed(precision)}${u_s}`;
+		return `${v_ms.toFixed(precision)}${u_ms}`;
+	}
 }
 
 function fixDigits(number, digits = 2, preverse = false) {
