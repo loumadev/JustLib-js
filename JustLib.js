@@ -3058,9 +3058,9 @@ class EventListener {
 		/** @type {Map<string, JLListener[]>} */
 		this.listenersMap = new Map();
 
+		// ((type: string, callback: (event: JLEvent) => void) => JLListener) &
 		/**
 		 * @type {
-			((type: string, callback: (event: JLEvent) => void) => JLListener) &
 			((type: "__listenerAddEvent__", callback: (event: JLEvent & {listener: JLListener}) => void) => JLListener)
 		   }
 		 * @alias EventListener.addEventListener
@@ -3428,7 +3428,6 @@ EventListenerStatic.listenersMap = new Map();
 
 /**
  * @type {
-	((type: string, callback: (event: JLEvent) => void) => JLListener) &
 	((type: "__listenerAddEvent__", callback: (event: JLEvent & {listener: JLListener}) => void) => JLListener)
    }
  * @alias EventListener.addEventListener
@@ -3564,6 +3563,7 @@ class DropArea extends EventListener {
 
 		/**
 		 * @type {
+				EventListener["on"] &
 				((event: 'drop', callback: (event: EventListener.Event) => void) => EventListener.Listener) &
 				((event: 'focus', callback: (event: EventListener.Event) => void) => EventListener.Listener) &
 				((event: 'blur', callback: (event: EventListener.Event) => void) => EventListener.Listener) &
@@ -3572,6 +3572,7 @@ class DropArea extends EventListener {
 				((event: 'dragleave', callback: (event: EventListener.Event) => void) => EventListener.Listener) 
 			}
 		*/
+		// @ts-ignore
 		this.on;
 
 		this.root = rootNode;
