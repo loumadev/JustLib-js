@@ -164,7 +164,7 @@ var JL = function(root, selector, index) {
 		var elm = document.querySelectorAll(root);
 		index = selector;
 	} else {
-		if(!(root instanceof HTMLElement)) throw new TypeError(`'root' is not valid HTMLElement`);
+		if(!(root instanceof HTMLElement || root instanceof SVGElement)) throw new TypeError(`'root' is not valid HTMLElement`);
 		if(typeof selector !== "string") throw new TypeError(`'selector' is not a HTML selector`);
 
 		var elm = root.querySelectorAll(selector);
