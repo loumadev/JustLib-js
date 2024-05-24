@@ -265,19 +265,56 @@ function cloneElement(node, style = true) {
  * @returns {boolean}
  */
 function isElementInView(elm, minimal = 1, axis = 2) {
-	var pos = getElementPosition(elm);
-	var dim = getElementDimensions(elm);
-	minimal = clamp(minimal, 0, 1);
-
 	if(axis != 0 && axis != 1 && axis != 2) throw new TypeError(axis + " is not valid axis");
 
-	var isX = pos.x + dim.w * (1 - minimal) > 0 && pos.x + dim.w * minimal < window.innerWidth;
-	var isY = pos.y + dim.h * (1 - minimal) > 0 && pos.y + dim.h * minimal < window.innerHeight;
+	const pos = getElementPosition(elm);
+	const dim = getElementDimensions(elm);
+	minimal = clamp(minimal, 0, 1);
 
-	if(axis == 0 && isX && isY) return true;
-	else if(axis == 1 && isX) return true;
-	else if(axis == 2 && isY) return true;
-	return false;
+	const isX = pos.x + dim.w * (1 - minimal) > 0 && pos.x + dim.w * minimal < window.innerWidth;
+	const isY = pos.y + dim.h * (1 - minimal) > 0 && pos.y + dim.h * minimal < window.innerHeight;
+
+	switch(axis) {
+		case 0: return isX && isY;
+		case 1: return isX;
+		case 2: return isY;
+		default: return false;
+	}
+}
+
+/**
+ * 
+ * @param {HTMLElement} elm Target element
+ * @param {number} minimal 
+ * @param {number} axis 0 - Both axis, 1 - X axis, 2 - Y axis (default = 2)
+ * @returns {boolean}
+ */
+function isElementVisible(elm, minimal = 1, axis = 2) {
+	if(axis != 0 && axis != 1 && axis != 2) throw new TypeError(axis + " is not valid axis");
+
+	// Take into account the dimensions of the parent element
+	const parent = elm.parentElement;
+	if(!parent) return isElementInView(elm, minimal, axis);
+
+	const pos = getElementPosition(elm);
+	const dim = getElementDimensions(elm);
+	const pos_p = getElementPosition(parent);
+	const dim_p = getElementDimensions(parent);
+
+	minimal = clamp(minimal, 0, 1);
+
+	const isX_p = pos.x + dim.w * (1 - minimal) > pos_p.x && pos.x + dim.w * minimal < pos_p.x + dim_p.w;
+	const isY_p = pos.y + dim.h * (1 - minimal) > pos_p.y && pos.y + dim.h * minimal < pos_p.y + dim_p.h;
+
+	const isX = pos.x + dim.w * (1 - minimal) > 0 && pos.x + dim.w * minimal < window.innerWidth;
+	const isY = pos.y + dim.h * (1 - minimal) > 0 && pos.y + dim.h * minimal < window.innerHeight;
+
+	switch(axis) {
+		case 0: return isX && isY && isX_p && isY_p;
+		case 1: return isX && isX_p;
+		case 2: return isY && isY_p;
+		default: return false;
+	}
 }
 
 /**
