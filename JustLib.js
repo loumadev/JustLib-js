@@ -1469,7 +1469,7 @@ class Matrix {
 	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Calls callback function on each element of Matrix, and returns result matrix.
-	 * @param {(value: number, x: number, y: number, thisArg: Matrix)} callback Callback function.
+	 * @param {(value: number, x: number, y: number, thisArg: Matrix) => number} callback Callback function.
 	 * @returns {Matrix} Result matrix.
 	 */
 	map(callback) {
