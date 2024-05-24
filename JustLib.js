@@ -157,6 +157,7 @@ function getPath(elm) {
 		((root: HTMLElement, selector: string, index: true) => HTMLElement[])
   }
  */
+// @ts-ignore
 var JL = function(root, selector, index) {
 	if(typeof index === "undefined") index = -1;
 
@@ -349,16 +350,25 @@ function exitFullscreen() {
 	if(document.exitFullscreen) {
 		document.exitFullscreen();
 	} else if("mozCancelFullScreen" in document) {
+		// @ts-ignore
 		document["mozCancelFullScreen"]();
 	} else if("webkitExitFullscreen" in document) {
+		// @ts-ignore
 		document["webkitExitFullscreen"]();
 	} else if("msExitFullscreen" in document) {
+		// @ts-ignore
 		document["msExitFullscreen"]();
 	} else return false;
 }
 
 function isTouchscreen() {
-	if(("ontouchstart" in window) || navigator.maxTouchPoints > 0 || navigator["msMaxTouchPoints"] > 0 || ("DocumentTouch" in window && document instanceof DocumentTouch)) return true;
+	if(
+		("ontouchstart" in window) ||
+		navigator.maxTouchPoints > 0 ||
+		navigator["msMaxTouchPoints"] > 0 ||
+		// @ts-ignore
+		("DocumentTouch" in window && document instanceof DocumentTouch)
+	) return true;
 	else return false;
 }
 
@@ -473,6 +483,7 @@ function indexOf(arr, elm) {
 		((html: string, asArray: boolean) => HTMLElement[])
   }
  */
+// @ts-ignore
 var parseHTML = function(html, index) {
 	const template = document.createElement("template");
 	template.innerHTML = html.replace(/<!--.*?-->/g, "").replace(/>\s+</g, "><").trim();
@@ -524,7 +535,7 @@ function objectDeepMerge(target, source, isMergingArrays = false) {
 	})(target);
 
 
-	if(!Object.isObject(target) || !Object.isObject(source)) return source;
+	if(!Object["isObject"](target) || !Object["isObject"](source)) return source;
 
 	Object.keys(source).forEach(key => {
 		const targetValue = target[key];
@@ -541,7 +552,7 @@ function objectDeepMerge(target, source, isMergingArrays = false) {
 			} else {
 				target[key] = targetValue.concat(sourceValue);
 			}
-		else if(Object.isObject(targetValue) && Object.isObject(sourceValue)) {
+		else if(Object["isObject"](targetValue) && Object["isObject"](sourceValue)) {
 			target[key] = objectDeepMerge(Object.assign({}, targetValue), sourceValue, isMergingArrays);
 		} else target[key] = sourceValue;
 	});
@@ -812,7 +823,7 @@ function timeout(time) {
  * iterate(undefined);           // []
  */
 function iterate(iterable) {
-	if(iterable === undefined || iterable === null) return [];
+	if(iterable === undefined || iterable === null) return /**@type {any}*/([]);
 	else if(typeof iterable === "string") return /** @type {any} */([...iterable].map((char, i) => [i, char]));
 	else if(iterable instanceof Array) return /** @type {any} */(iterable.map((value, i) => [i, value]));
 	else if(iterable.constructor === Object) return /** @type {any} */(Object.entries(iterable).map(([key, value], i) => [i, key, value]));
@@ -830,19 +841,20 @@ function iterate(iterable) {
  * zip([1, "a"], [2, "b"], [3]) //[1, 2, 3] -> "c" is missing
  */
 function zip(...iterables) {
-	var iterator = [];
-	var len = Math.min(...iterables.map(e => e.length));
+	const iterator = /** @type {any} */([]);
+	const len = Math.min(...iterables.map(e => e && e.length || 0));
 
 	if(iterables.length == 0) return iterator;
 
-	for(var i = 0; i < len; i++) {
+	for(let i = 0; i < len; i++) {
 		iterator[i] = [];
-		for(var j = 0; j < iterables.length; j++) {
+		for(let j = 0; j < iterables.length; j++) {
+			// @ts-ignore
 			iterator[i][j] = iterables[j][i];
 		}
 	}
 
-	return /** @type {any} */(iterator);
+	return iterator;
 }
 
 /**
@@ -3597,7 +3609,7 @@ class DropArea extends EventListener {
 					target: this.root,
 				};
 
-				if(event == "drop") EventData.dataTransfer = e.dataTransfer;
+				if(event == "drop") EventData.dataTransfer = /**@type {DragEvent}*/(e).dataTransfer;
 				if(focusEvents.includes(event)) this.dispatchEvent("focus", EventData);
 				if(blurEvents.includes(event)) this.dispatchEvent("blur", EventData);
 
