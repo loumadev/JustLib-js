@@ -3951,8 +3951,8 @@ const ANGLES = {
 	sin: new Float32Array(360 * _angle_precision),
 	cos: new Float32Array(360 * _angle_precision),
 };
-const SCROLL_SMOOTH_CENTER = {behavior: "smooth", block: "center", inline: "center"};
-const SCROLL_SMOOTH_TOP = {behavior: "smooth", top: 0};
+const SCROLL_SMOOTH_CENTER = /** @type {const} */({behavior: "smooth", block: "center", inline: "center"});
+const SCROLL_SMOOTH_TOP = /** @type {const} */({behavior: "smooth", top: 0});
 const TRANSPARENT = new Color(0, 0, 0, 0);
 const COLLISION = {
 	/**
