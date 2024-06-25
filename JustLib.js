@@ -3628,6 +3628,35 @@ class DropArea extends EventListener {
 	}
 }
 
+class TimingInterface {
+	// eslint-disable-next-line valid-jsdoc
+	/**
+	 * @static
+	 * @return {() => number} 
+	 * @memberof TimingInterface
+	 */
+	static _createInterface() {
+		// Check if document.timeline.currentTime is available and return the corresponding function
+		if(
+			typeof document !== "undefined" &&
+			document.timeline &&
+			typeof document.timeline.currentTime === "number"
+		) {
+			return () => /**@type {number}*/(document.timeline.currentTime);
+		}
+
+		// Check if performance.now is available and return the corresponding function
+		if(typeof performance !== "undefined" && typeof performance.now === "function") {
+			return () => performance.now();
+		}
+
+		// Fallback to Date.now and return the corresponding function
+		const start = Date.now();
+		return () => Date.now() - start;
+	}
+}
+TimingInterface.getTime = TimingInterface._createInterface();
+
 // eslint-disable-next-line valid-jsdoc
 /**
  * @deprecated
@@ -4034,6 +4063,7 @@ if(typeof module !== "undefined") {
 		Matrix,
 		RandomGenerator,
 		DropArea,
+		TimingInterface,
 		Vector,
 		Quaternion,
 
