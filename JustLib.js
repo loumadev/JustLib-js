@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2022-12-12T16:41:28+01:00
+ * Last Modified: 2024-07-19T17:29:04+02:00
  * 
  * Copyright (c) 2019 - 2024 Jaroslav Louma
  */
@@ -615,15 +615,41 @@ function delCookie(cname) {
 	document.cookie = cname + "=;expires=Wed; 01 Jan 1970";
 }
 
-function generateUniqueID(length) {
-	var pattern = "1234567890abcdefghijklmnopqrstuvwxyz",
-		buffer = "";
-	for(var i = 0; i < length; i++) {
-		var ch = pattern.charAt(Math.random() * pattern.length);
-		buffer += Math.random() > .5 ? ch : ch.toUpperCase();
+/**
+ * @param {number} [length=20] `< 16` => `20`, `>= 16` => `length`
+ * @return {string} 
+ * @example
+ * generateUniqueID()   // "669a813982637658690f"             (length=20)
+ * generateUniqueID(10) // "669a81785e53a1cd0d79"             (length=20)
+ * generateUniqueID(16) // "669a81e92f2a9562"                 (length=16)
+ * generateUniqueID(17) // "669a81f2ce9e95281"                (length=17)
+ * generateUniqueID(32) // "669a81fdc1ee479c6bf89d86d2f0dd2a" (length=32)
+ */
+function generateUniqueID(length = 20) {
+	let rand = "";
+
+	length -= 16;
+
+	if(length < 0) length = 4;
+	while(length > 0) {
+		const size = length > generateUniqueID._MAX_SAFE_INT_LEN ? generateUniqueID._MAX_SAFE_INT_LEN : length;
+		rand += generateUniqueID._randBitsStr(4 * size);
+		length -= generateUniqueID._MAX_SAFE_INT_LEN;
 	}
-	return buffer;
+
+	const time = generateUniqueID._str(Math.floor(Date.now() / 1000));
+	const counter = generateUniqueID._str(generateUniqueID._cnt = ++generateUniqueID._cnt % generateUniqueID._cntSize, 4);
+
+	return time + rand + generateUniqueID._key + counter;
 }
+generateUniqueID._bitMask = n => (2 ** n) - 1;
+generateUniqueID._randBits = n => Math.floor(Math.random() * generateUniqueID._bitMask(n));
+generateUniqueID._str = (x, n = 0) => x.toString(16).padStart(n, "0");
+generateUniqueID._randBitsStr = n => generateUniqueID._str(generateUniqueID._randBits(n), Math.floor(n / 4));
+generateUniqueID._key = generateUniqueID._str(generateUniqueID._randBits(8 * 2), 2);
+generateUniqueID._cntSize = generateUniqueID._bitMask(8 * 2);
+generateUniqueID._cnt = Math.floor(Math.random() * generateUniqueID._cntSize);
+generateUniqueID._MAX_SAFE_INT_LEN = 13;
 
 /**
  * @deprecated Use `generateUniqueID(...)` instead
