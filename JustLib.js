@@ -4,7 +4,7 @@
  * File: JustLib.js
  * Author: Jaroslav Louma
  * File Created: 2019-06-14T18:18:58+02:00
- * Last Modified: 2024-07-19T17:29:04+02:00
+ * Last Modified: 2024-07-23T18:57:06+02:00
  * 
  * Copyright (c) 2019 - 2024 Jaroslav Louma
  */
@@ -942,6 +942,39 @@ function uniquify(x) {
 		return obj;
 	}
 	return /** @type {any} */(x);
+}
+
+// eslint-disable-next-line valid-jsdoc
+/**
+ * Match a value against a list of cases and return the corresponding result.
+ * 
+ * @template T
+ * @template {{when?: T | ((x: T) => boolean), $: unknown}[]} U
+ * @param {T} x The value to match
+ * @param {U} cases The list of cases to match against
+ * @returns {U[number] extends {when: any} ? U[number]["$"] | undefined : U[number]["$"]} The matched case's value or undefined if no match is found and there's no default case
+ * 
+ * @example
+ * const x = "bar"
+ * const y = match(x, [
+ * 	{when: "foo", $: true},
+ * 	{when: "bar", $: 2},
+ * 	{when: "baz", $: "3"},
+ * 	{$: null}  // Default value
+ * ]);
+ * y // 2
+ */
+function match(x, cases) {
+	const length = cases.length;
+	for(let i = 0; i < length; i++) {
+		const _case = cases[i];
+		if(!("when" in _case)) return _case.$;
+		if(_case.when === x) return _case.$;
+		// @ts-ignore
+		if(typeof _case.when === "function" && _case.when(x)) return _case.$;
+	}
+
+	return undefined;
 }
 
 
@@ -4157,6 +4190,7 @@ if(typeof module !== "undefined") {
 		zip,
 		range,
 		uniquify,
+		match,
 		copyToClipboard,
 		Highlight,
 		createSlider,
