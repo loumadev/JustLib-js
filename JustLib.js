@@ -830,6 +830,105 @@ function timeout(time) {
 	return new Promise(resolve => setTimeout(resolve, time));
 }
 
+/**
+ * @example
+ * const myElm = await poll(() => document.querySelector("#elm"), result => result !== null);
+ * @template T
+ * @template {T} [U=never]
+ * @param {(() => T) | (() => Promise<T>)} fn
+ * @param {((result: T) => boolean) | ((result: T) => result is U)} fnCondition
+ * @param {number} [ms=1000]
+ * @param {number} [timeout=10000]
+ * @return {Promise<U extends never ? T : U>}
+ */
+async function poll(fn, fnCondition, ms = 1000, timeout = 10000) {
+	const startTime = Date.now();
+
+	const executePoll = async (resolve, reject) => {
+		const result = await fn();
+		if(fnCondition(result)) {
+			return resolve(result);
+		} else if(timeout && Date.now() - startTime >= timeout) {
+			return reject(new Error("Polling timed out"));
+		} else {
+			setTimeout(executePoll, ms, resolve, reject);
+		}
+	};
+
+	return new Promise(executePoll);
+}
+
+/**
+ * Creates a debounced version of a function that delays invoking the function
+ * until after `timeout` milliseconds have elapsed since the last time it was called.
+ * @example
+ * button.onclick = debounce(() => console.log("Clicked"), 500); // Prevents accidental double-clicks
+ * @template {(...args: any[]) => any} T
+ * @param {T} func The function to debounce
+ * @param {number} [timeout=300] The number of milliseconds to delay
+ * @param {boolean} [immediate=false] Whether to invoke the function on the leading edge
+ * @return {T} The debounced function
+ */
+function debounce(func, timeout = 300, immediate = false) {
+	let timer;
+
+	// @ts-ignore
+	return function(...args) {
+		const later = () => {
+			timer = null;
+			if(!immediate) func.apply(this, args);
+		};
+
+		const callNow = immediate && !timer;
+		clearTimeout(timer);
+		timer = setTimeout(later, timeout);
+		if(callNow) func.apply(this, args);
+	};
+}
+
+/**
+ * Creates a throttled version of a function that only invokes the function
+ * at most once per every `timeout` milliseconds.
+ * @example
+ * // Limits the rate at which a function can fire
+ * window.onresize = throttle(() => console.log("Resized"), 300);
+ * window.onmousemove = throttle(() => console.log("Mouse moved"), 300);
+ * @template {(...args: any[]) => any} T
+ * @param {T} func The function to throttle
+ * @param {number} [timeout=300] The number of milliseconds to delay between invocations
+ * @return {T} The throttled function
+ */
+function throttle(func, timeout = 300) {
+	let timer = null;
+	let lastArgs = null;
+	let lastContext = null;
+
+	// @ts-ignore
+	return function(...args) {
+		// If there's a timer, store the latest arguments and context
+		if(timer) {
+			lastArgs = args;
+			lastContext = this;
+			return;
+		}
+
+		// Execute the function
+		func.apply(this, args);
+
+		// Start the cooldown timer
+		timer = setTimeout(() => {
+			timer = null;
+
+			// If there were any calls during the timeout, execute with the latest args
+			if(!lastArgs) return;
+
+			func.apply(lastContext, lastArgs);
+			lastArgs = null;
+			lastContext = null;
+		}, timeout);
+	};
+}
+
 // eslint-disable-next-line valid-jsdoc
 /**
  * Create iterable key-value pairs.
@@ -4186,6 +4285,9 @@ if(typeof module !== "undefined") {
 		fixDigits,
 		sleep,
 		timeout,
+		poll,
+		debounce,
+		throttle,
 		iterate,
 		zip,
 		range,
