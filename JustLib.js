@@ -2730,6 +2730,48 @@ class Color {
 	}
 
 	/**
+	 * @return {{l: number, c: number, h: number}}
+	 * @memberof Color
+	 */
+	toOKLCH() {
+		// Convert to linear RGB using lookup table
+		const linearRGB = new Float32Array([
+			Color.linearize(this.r),
+			Color.linearize(this.g),
+			Color.linearize(this.b)
+		]);
+
+		// Convert to XYZ
+		const xyz = Color.multiply3x3WithVector(Color.M1, linearRGB);
+
+		// Convert to LMS with cubic root approximation
+		const lms = new Float32Array([
+			Math.cbrt(xyz[0]),
+			Math.cbrt(xyz[1]),
+			Math.cbrt(xyz[2])
+		]);
+
+		// Convert to ICtCp
+		const ictcp = Color.multiply3x3WithVector(Color.M2, lms);
+
+		// Extract L component
+		const L = ictcp[0];
+
+		// Calculate C and H
+		const _a = ictcp[1];
+		const _b = ictcp[2];
+		const C = Math.sqrt(_a * _a + _b * _b);
+
+		// Fast arctangent approximation
+		let h = Math.atan2(_b, _a) * RAD_TO_DEG;
+		// @ts-ignore
+		h += (h < 0) * 360; // Branchless adjustment for negative angles
+
+		return {l: L, c: C, h};
+	}
+
+	// eslint-disable-next-line valid-jsdoc
+	/**
 	 * Returns a string representing the color using specified format
 	 * Supported formats: RGB, RGBA, HEX, HEXA
 	 * Default format: RGBA
