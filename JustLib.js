@@ -4307,6 +4307,8 @@ const PI = Math.PI;
 const HALF_PI = PI / 2;
 const TWO_PI = PI * 2;
 const ONE_DEG = PI / 180;
+const RAD_TO_DEG = 180 / PI;
+const DEG_TO_RAD = PI / 180;
 const sqrt = Math.sqrt;
 const pow = Math.pow;
 const sin = Math.sin;
@@ -4488,6 +4490,8 @@ if(typeof module !== "undefined") {
 		HALF_PI,
 		TWO_PI,
 		ONE_DEG,
+		RAD_TO_DEG,
+		DEG_TO_RAD,
 		sqrt,
 		pow,
 		sin,
