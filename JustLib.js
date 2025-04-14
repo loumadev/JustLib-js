@@ -748,7 +748,7 @@ function getFormattedSize(s) {
 	if(s < 1024) return s + "B";
 	else if(s < 1048576) return (s / 1024).toFixed(2) + "kB";
 	else if(s < 1073741824) return (s / 1048576).toFixed(2) + "MB";
-	else return (s / 1073741824).toFixed(2) + "MB";
+	else return (s / 1073741824).toFixed(2) + "GB";
 }
 
 /**
