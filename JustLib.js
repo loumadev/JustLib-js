@@ -917,6 +917,39 @@ async function poll(fn, fnCondition, ms = 1000, timeout = 10000) {
 }
 
 /**
+ * Distributes a promise provided by the callback function between
+ * all subsequent callers, preventing async duplication
+ * @example
+ * const cache = new Map();
+ * function getResource(id) {
+ *   if(cache.has(id)) return cache.get(id);
+ *   return inflight(id, () => fetchResource(id));
+ * }
+ * 
+ * await getResource("123"); // Starts the fetch
+ * await getResource("123"); // Waits
+ * await getResource("123"); // Waits
+ * // Resolution of the first call will resolve the other two
+ * @template T
+ * @param {any} key 
+ * @param {() => Promise<T>} fn 
+ * @returns {Promise<T>}
+ */
+async function inflight(key, fn) {
+	if(inflight._activePromises.has(key)) {
+		return inflight._activePromises.get(key);
+	}
+
+	const promise = fn().finally(() => {
+		inflight._activePromises.delete(key);
+	});
+
+	inflight._activePromises.set(key, promise);
+	return promise;
+}
+inflight._activePromises = new Map();
+
+/**
  * Creates a debounced version of a function that delays invoking the function
  * until after `timeout` milliseconds have elapsed since the last time it was called.
  * @example
