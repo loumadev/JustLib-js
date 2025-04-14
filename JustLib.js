@@ -810,6 +810,64 @@ function fixDigits(number, digits = 2, preverse = false) {
 }
 
 /**
+ * Mutex class for locking and unlocking resources.
+ * @class Mutex
+ */
+class Mutex {
+	constructor() {
+		this._locked = false;
+		this._queue = [];
+	}
+
+	/**
+	 * Locks the mutex, preventing other locks until unlocked.
+	 * @example
+	 * const mutex = new Mutex();
+	 * let shared = 0;
+	 * async function accessShared() {
+	 *   const unlock = await mutex.lock();
+	 *   try {
+	 *     // Critical section
+	 *     const temp = shared;
+	 *     await doSomeWork();
+	 *     shared = temp + 1;
+	 *   } finally {
+	 *     unlock();
+	 *   }
+	 * }
+	 * 
+	 * await accessShared(); // shared === 1
+	 * await accessShared(); // shared === 2
+	 * await accessShared(); // shared === 3
+	 * @returns {Promise<() => void>} A function to unlock the mutex.
+	 */
+	async lock() {
+		if(this._locked) {
+			return new Promise(resolve => this._queue.push(resolve));
+		}
+
+		this._locked = true;
+		return () => this.unlock();
+	}
+
+	/**
+	 * Unlocks the mutex, allowing other locks to proceed.
+	 * If there are any pending locks, the first one in the queue will be resolved.
+	 * **NOTE:** Preferably, use the function returned by `lock()` to unlock the mutex.
+	 */
+	unlock() {
+		if(!this._locked) return;
+
+		if(this._queue.length > 0) {
+			const resolve = this._queue.shift();
+			if(resolve) resolve(() => this.unlock());
+		} else {
+			this._locked = false;
+		}
+	}
+}
+
+/**
  * Synchronous timeout.
  * @param {number} time Time in milliseconds.
  * @returns {boolean} Always true
