@@ -2775,12 +2775,18 @@ class Color {
 	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Returns a string representing the color using specified format
-	 * Supported formats: RGB, RGBA, HEX, HEXA
+	 * Supported formats: RGB, RGBA, HEX, HEXA, HLS, HSLA
 	 * Default format: RGBA
-	 * @param {"RGB" | "RGBA" | "HEX" | "HEXA" | "rgb" | "rgba" | "hex" | "hexa"} [format="RGBA"]
+	 * @param {"RGB" | "RGBA" | "HEX" | "HEXA" | "HLS" | "HSLA" | "OKLCH" | "OKLCHA" | "rgb" | "rgba" | "hex" | "hexa" | "hsl" | "hsla" | "oklch" | "oklcha"} [format="RGBA"]
+	 * @param {{round?: boolean, precision?: number}} [options={}] Options
 	 * @returns {string} color
 	 */
-	toString(format = "RGBA") {
+	toString(format = "RGBA", options = {}) {
+		const {
+			round = false,
+			precision = 2,
+		} = options;
+
 		switch(format.toLowerCase()) {
 			case "rgb":
 				return `rgb(${this.r}, ${this.g}, ${this.b})`;
@@ -2790,6 +2796,26 @@ class Color {
 				return `#${fixDigits(this.r.toString(16))}${fixDigits(this.g.toString(16))}${fixDigits(this.b.toString(16))}`;
 			case "hexa":
 				return `#${fixDigits(this.r.toString(16))}${fixDigits(this.g.toString(16))}${fixDigits(this.b.toString(16))}${fixDigits(this.a.toString(16))}`;
+			case "hsl": {
+				const [h, s, l] = this.toHSL();
+				if(round) return `hsl(${(h * 360).toFixed(precision)}, ${(s * 100).toFixed(precision)}%, ${(l * 100).toFixed(precision)}%)`;
+				return `hsl(${h * 360}, ${s * 100}%, ${l * 100}%)`;
+			}
+			case "hsla": {
+				const [h, s, l] = this.toHSL();
+				if(round) return `hsla(${(h * 360).toFixed(precision)}, ${(s * 100).toFixed(precision)}%, ${(l * 100).toFixed(precision)}%, ${this.a})`;
+				return `hsla(${h * 360}, ${s * 100}%, ${l * 100}%, ${this.a})`;
+			}
+			case "oklch": {
+				const {l, c, h} = this.toOKLCH();
+				if(round) return `oklch(${l.toFixed(precision)}, ${c.toFixed(precision)}, ${h.toFixed(precision)})`;
+				return `oklch(${l}, ${c}, ${h})`;
+			}
+			case "oklcha": {
+				const {l, c, h} = this.toOKLCH();
+				if(round) return `oklcha(${l.toFixed(precision)}, ${c.toFixed(precision)}, ${h.toFixed(precision)}, ${this.a})`;
+				return `oklcha(${l}, ${c}, ${h}, ${this.a})`;
+			}
 			default:
 				throw new TypeError(`Invalid color format '${format}'`);
 		}
@@ -2924,6 +2950,46 @@ class Color {
 	}
 
 	/**
+	 * @static
+	 * @param {number} L
+	 * @param {number} C
+	 * @param {number} h
+	 * @return {Color} 
+	 * @memberof Color
+	 */
+	static fromOKLCH(L, C, h) {
+		// Pre-calculate sine and cosine
+		const hRad = h * DEG_TO_RAD;
+		const sinH = Math.sin(hRad);
+		const cosH = Math.cos(hRad);
+
+		// Convert to OKLab
+		const oklab = new Float32Array([
+			L,
+			C * cosH,
+			C * sinH
+		]);
+
+		// Convert to LMS
+		const lms = Color.multiply3x3WithVector(Color.M2_inv, oklab);
+
+		// Cube LMS values
+		lms[0] = lms[0] * lms[0] * lms[0];
+		lms[1] = lms[1] * lms[1] * lms[1];
+		lms[2] = lms[2] * lms[2] * lms[2];
+
+		// Convert to linear RGB
+		const linearRGB = Color.multiply3x3WithVector(Color.M1_inv, lms);
+
+		// Convert to regular RGB with fast clamping
+		return new Color(
+			Math.round(Math.max(0, Math.min(255, Color.delinearize(linearRGB[0]) * 255))),
+			Math.round(Math.max(0, Math.min(255, Color.delinearize(linearRGB[1]) * 255))),
+			Math.round(Math.max(0, Math.min(255, Color.delinearize(linearRGB[2]) * 255)))
+		);
+	}
+
+	/**
 	 * Generate random number according to pamarameters. Positive argument means color component greater than entered argument and lower means less than argument.
 	 * @param {number} red Red component of color
 	 * @param {number} green Green component of color
@@ -2944,6 +3010,73 @@ class Color {
 		return new Color(r, g, b, 1);
 	}
 }
+
+
+// Pre-computed constants
+Color.M1 = new Float32Array([
+	0.4122214708, 0.5363325363, 0.0514459929,
+	0.2119034982, 0.6806995451, 0.1073969566,
+	0.0883024619, 0.2817188376, 0.6299787005
+]);
+
+Color.M2 = new Float32Array([
+	0.2104542553, 0.7936177850, -0.0040720468,
+	1.9779984951, -2.4285922050, 0.4505937099,
+	0.0259040371, 0.7827717662, -0.8086757660
+]);
+
+Color.M1_inv = new Float32Array([
+	4.0767416621, -3.3077115913, 0.2309699292,
+	-1.2684380046, 2.6097574011, -0.3413193965,
+	-0.0041960863, -0.7034186147, 1.7076147010
+]);
+
+Color.M2_inv = new Float32Array([
+	1.0000000000, 0.3963377774, 0.2158037573,
+	1.0000000000, -0.1055613458, -0.0638541728,
+	1.0000000000, -0.0894841775, -1.2914855480
+]);
+
+// Optimized helper functions using faster operations
+Color.linearize = (() => {
+	const ONE_OVER_255 = 1 / 255;
+	const lookupTable = new Float32Array(256);
+	for(let i = 0; i < 256; i++) {
+		const val = i * ONE_OVER_255;
+		lookupTable[i] = val < 0.04045
+			? val / 12.92
+			: Math.pow((val + 0.055) / 1.055, 2.4);
+	}
+	return (val) => lookupTable[val];
+})();
+
+Color.delinearize = (() => {
+	const lookupTable = new Float32Array(1024);
+	for(let i = 0; i < 1024; i++) {
+		const val = i / 1023;
+		lookupTable[i] = val <= 0.0031308
+			? val * 12.92
+			: 1.055 * Math.pow(val, 1 / 2.4) - 0.055;
+	}
+	return (val) => {
+		const idx = Math.round(val * 1023);
+		return lookupTable[idx < 0 ? 0 : idx > 1023 ? 1023 : idx];
+	};
+})();
+
+// Fast matrix multiplication for 3x3 matrices
+/**
+ * @param {Float32Array} m 
+ * @param {Float32Array} v 
+ * @returns {Float32Array}
+ */
+Color.multiply3x3WithVector = function(m, v) {
+	return new Float32Array([
+		m[0] * v[0] + m[1] * v[1] + m[2] * v[2],
+		m[3] * v[0] + m[4] * v[1] + m[5] * v[2],
+		m[6] * v[0] + m[7] * v[1] + m[8] * v[2]
+	]);
+};
 
 class ComplexNumber {
 	/**
