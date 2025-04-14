@@ -4002,6 +4002,7 @@ TimingInterface.getTime = TimingInterface._createInterface();
  * @param {number} [value=(min + max) / 2]
  * @param {string | HTMLElement} [elm=JL("body", 0)]
  * @param {string} [cls="slider"]
+ * @return {HTMLInputElement} Created slider
  */
 function createSlider(
 	output,
@@ -4036,14 +4037,16 @@ function createSlider(
 	const call = () => {
 		label.innerText = node.value;
 
-		if(typeof output === "string") eval(output + "=" + node.value);
-		else if(typeof output === "function") output(+node.value);
+		if(typeof output === "string") return eval(output + "=" + node.value);
+		else if(typeof output === "function") return output(+node.value);
 
 		throw new Error("[JustLib] Slider: Unknown output");
 	};
 
 	node.addEventListener("change", call);
 	node.addEventListener("input", call);
+
+	return node;
 }
 
 function createWindow(url, title, options = {}, center = false) {
