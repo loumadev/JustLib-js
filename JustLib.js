@@ -867,22 +867,24 @@ async function poll(fn, fnCondition, ms = 1000, timeout = 10000) {
  * @param {T} func The function to debounce
  * @param {number} [timeout=300] The number of milliseconds to delay
  * @param {boolean} [immediate=false] Whether to invoke the function on the leading edge
- * @return {T} The debounced function
+ * @return {T extends (...args: infer A) => infer U ? (...args: A) => Promise<Awaited<U>> : never}
  */
 function debounce(func, timeout = 300, immediate = false) {
 	let timer;
 
 	// @ts-ignore
 	return function(...args) {
-		const later = () => {
-			timer = null;
-			if(!immediate) func.apply(this, args);
-		};
+		return new Promise((resolve, reject) => {
+			const later = () => {
+				timer = null;
+				if(!immediate) resolve(func.apply(this, args));
+			};
 
-		const callNow = immediate && !timer;
-		clearTimeout(timer);
-		timer = setTimeout(later, timeout);
-		if(callNow) func.apply(this, args);
+			const callNow = immediate && !timer;
+			clearTimeout(timer);
+			timer = setTimeout(later, timeout);
+			if(callNow) resolve(func.apply(this, args));
+		});
 	};
 }
 
